@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:d2b-stream:0.1:capabilities",
+  "title": "d2b-stream 0.1 capabilities response",
+  "description": "The UTF-8 JSON representation returned by GET /d2b/v0/capabilities.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol",
+    "version",
+    "maximum_binary_frame_size",
+    "maximum_control_message_size",
+    "maximum_active_stream_sessions",
+    "maximum_control_connections",
+    "persistent_capture_supported",
+    "security_mode",
+    "streams"
+  ],
+  "properties": {
+    "protocol": {
+      "const": "d2b-stream"
+    },
+    "version": {
+      "const": "0.1"
+    },
+    "maximum_binary_frame_size": {
+      "type": "integer",
+      "minimum": 32,
+      "maximum": 4294967295,
+      "description": "Semantic validation additionally requires this limit to carry the minimum transport frame for every advertised complete parameter set."
+    },
+    "maximum_control_message_size": {
+      "const": 2048
+    },
+    "maximum_active_stream_sessions": {
+      "const": 1
+    },
+    "maximum_control_connections": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4294967295
+    },
+    "persistent_capture_supported": {
+      "type": "boolean"
+    },
+    "security_mode": {
+      "enum": [
+        "isolated",
+        "unauthenticated-read-only",
+        "pairing-token"
+      ]
+    },
+    "streams": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "$ref": "#/$defs/streamDescriptor"
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "uint32": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "streamParameters": {
+      "type": "object",
+      "maxProperties": 32,
+      "propertyNames": {
+        "$ref": "#/$defs/identifier"
+      },
+      "properties": {
+        "sample_format": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "channel_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "channel_mask": {
+          "$ref": "#/$defs/uint32"
+        },
+        "sample_rate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "numerator",
+            "denominator"
+          ],
+          "properties": {
+            "numerator": {
+              "$ref": "#/$defs/uint32"
+            },
+            "denominator": {
+              "$ref": "#/$defs/uint32"
+            }
+          }
+        },
+        "samples_per_frame": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        }
+      },
+      "additionalProperties": true
+    },
+    "profileDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "parameter_sets"
+      ],
+      "properties": {
+        "profile": {
+          "$ref": "#/$defs/identifier"
+        },
+        "parameter_sets": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "$ref": "#/$defs/streamParameters"
+          }
+        }
+      }
+    },
+    "streamDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "profiles"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "profiles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "$ref": "#/$defs/profileDescriptor"
+          }
+        }
+      }
+    }
+  }
+}

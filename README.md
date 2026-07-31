@@ -1,39 +1,69 @@
 # Device-to-Browser Data Streaming
 
-A vendor-neutral protocol and browser reference design for continuously streaming measured or sampled data from embedded devices to web browsers.
+English | [日本語](README_ja.md)
 
-## Status
+This repository specifies `d2b-stream`, a vendor-neutral application profile
+and reference design for continuously delivering device-acquired measurements
+or sampled data to a browser. It uses, rather than replaces, HTTP/1.1 and the
+WebSocket protocol; its own scope is the application framing, session state,
+sample identity, timing, and loss semantics above those standards.
 
-This project is in the pre-1.0 specification phase.
+## Current specification
 
-The initial scope is:
+The current protocol version is `0.1`. It defines:
 
-- an HTTP and WebSocket transport model;
-- a versioned binary streaming protocol;
-- monotonic timestamps and sample sequences;
-- explicit overflow, discontinuity, and gap semantics;
-- a timestamped voltage/current measurement profile;
-- a fixed-rate PCM audio profile;
-- browser-side recording and export guidance.
+- discovery and read-only status over HTTP;
+- strict JSON control messages over WebSocket text frames;
+- an exact 32-byte little-endian envelope and profile binary payloads;
+- monotonic timestamps, sample-frame sequences, and explicit gaps;
+- the `vi-measurement` and `pcm-audio` profiles;
+- exact stream-parameter negotiation and optional pairing-token authentication;
+- one active stream-session owner; and
+- public redacted status with authenticated detail on the control connection.
 
-This repository intentionally does not contain product-specific firmware.
+Start with the [protocol specification](docs/protocol-v0.1.md). The
+[architecture](docs/architecture.md), [browser reference parser](docs/browser-reference-parser.md),
+[implementation guidance](docs/implementation-guidance.md),
+[deployment guide](docs/deployment-guide.md), [conformance matrix](docs/conformance-matrix.md),
+and profile documents provide the remaining details required for an independent
+implementation.
 
-## Design principles
+The [prior-art and protocol-selection report](docs/prior-art-and-protocol-selection.md)
+explains why the profile combines existing web standards instead of adopting a
+serial, BLE, brokered, or laboratory streaming stack wholesale. The V/I
+[SenML mapping](docs/profiles/vi-measurement-senml-mapping.md) defines an export
+and interoperability layer without replacing the compact live binary profile.
 
-- Device acquisition tasks must not block on network transmission or storage.
-- Missing data must remain visible as missing data.
-- Core protocol terminology must remain independent of individual products.
-- Browser functionality must work without a CDN or mandatory framework.
-- Administrative device operations are outside the read-only streaming protocol.
+## Repository contents
 
-## Protocol identifier
+- `docs/`: normative application-profile, profile, security, compatibility,
+  prior-art, interoperability, and validation documents;
+- `schemas/`: self-contained JSON Schema Draft 2020-12 control-message and
+  capabilities schemas;
+- `test-vectors/`: JSON-encoded golden control, capabilities, and binary frame
+  vectors;
+- `tools/validate_test_vectors.py`: standard-library-only manual validator for
+  schema structure, strict control fixtures, binary frames, continuity, and
+  targeted mutation tests;
+- `tools/generate_test_vectors.py`: deterministic standard-library generator
+  for all JSON-encoded golden vectors.
 
-The initial protocol identifier is:
+Run all vector checks with:
 
-```text
-d2b-stream/0.1
+```sh
+python3 tools/validate_test_vectors.py
 ```
 
-## License
+The utility checks JSON syntax, Draft 2020-12 declarations, local reference
+existence, Schema-equivalent constraints used by the fixtures, and golden
+results. It does not perform full JSON Schema meta-schema validation. Refresh
+vectors intentionally with `python3 tools/generate_test_vectors.py`.
 
-MIT License. See [LICENSE](LICENSE).
+This repository intentionally contains no product-specific firmware, server,
+browser application, binary recording, or runtime dependency.
+
+## Status and license
+
+Version 0.1 is a pre-1.0 protocol. Compatibility rules are defined in the
+[versioning policy](docs/versioning-policy.md). Licensed under the MIT License;
+see [LICENSE](LICENSE).
