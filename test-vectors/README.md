@@ -31,6 +31,14 @@ whitespace, and its UTF-8 byte length is checked before JSON parsing. Thus the
 `message_hex` fixture represents raw text-message bytes that cannot be expressed
 as a JSON string, such as invalid UTF-8.
 
+Fixtures whose expected result depends on the lexical representation of JSON
+text use a string `message`, not an object. This includes duplicate object keys,
+`NaN`, `Infinity`, trailing data, raw byte-size tests, and a floating-point token
+such as `32.0` in an integer field. A normal JSON parser may discard numeric
+token distinctions while loading an outer object fixture; a string `message`
+must instead be passed to the control parser as the exact raw WebSocket text
+payload.
+
 Optional control `context` describes scenario state not encoded in one message,
 including `CONNECTED`, `READY`, `STREAMING`, and `CLOSED` validation.
 The second-client fixture records that connection A owns a STREAMING session,

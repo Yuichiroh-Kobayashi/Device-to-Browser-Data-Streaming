@@ -1068,6 +1068,13 @@ def validate_control_vectors(document: dict[str, Any], names: set[str]) -> int:
             or not HEX_RE.fullmatch(vector["message_hex"])
         ):
             raise FixtureError(f"{vector['name']}: invalid message_hex")
+        if vector["name"] == "integer_as_float" and (
+            not isinstance(vector.get("message"), str)
+            or '"max_binary_frame_size":32.0' not in vector["message"]
+        ):
+            raise FixtureError(
+                "integer_as_float: message must preserve the raw 32.0 token"
+            )
         if vector["direction"] not in {"client_to_server", "server_to_client"}:
             raise FixtureError(f"{vector['name']}: invalid direction")
         result = None

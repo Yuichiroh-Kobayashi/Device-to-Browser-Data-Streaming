@@ -240,7 +240,20 @@ def control_vectors() -> list[dict[str, Any]]:
         control_vector("json_infinity", "Reject Infinity.", "client_to_server", '{"type":"ping","correlation":Infinity}', error="invalid_message"),
         control_vector("json_negative_infinity", "Reject negative Infinity.", "client_to_server", '{"type":"ping","correlation":-Infinity}', error="invalid_message"),
         control_vector("json_trailing_data", "Reject trailing JSON data.", "client_to_server", '{"type":"ping","correlation":"a"} false', error="invalid_message"),
-        control_vector("integer_as_float", "Reject a floating-point value in an integer field.", "server_to_client", {"type": "welcome", "protocol": "d2b-stream", "version": "0.1", "max_control_message_size": 2048, "max_binary_frame_size": 32.0, "session_state": "ready"}, error="invalid_message"),
+        control_vector(
+            "integer_as_float",
+            "Reject a floating-point token in an integer field.",
+            "server_to_client",
+            (
+                '{"type":"welcome",'
+                '"protocol":"d2b-stream",'
+                '"version":"0.1",'
+                '"max_control_message_size":2048,'
+                '"max_binary_frame_size":32.0,'
+                '"session_state":"ready"}'
+            ),
+            error="invalid_message",
+        ),
         control_vector("integer_out_of_range", "Reject an out-of-range stream ID.", "server_to_client", {"type": "stream_started", "stream": "measurement-0", "profile": "vi-measurement", "parameters": VI_PARAMETERS, "stream_id": 4294967296}, error="invalid_message"),
         control_vector("type_mismatch", "Reject a string where an array is required.", "client_to_server", {"type": "hello", "protocol": "d2b-stream", "versions": "0.1"}, error="invalid_message"),
         control_vector("unknown_message_enum", "Reject an unknown control type.", "client_to_server", {"type": "begin"}, error="invalid_message"),

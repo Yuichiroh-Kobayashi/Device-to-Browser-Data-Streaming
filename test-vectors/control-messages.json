@@ -424,16 +424,9 @@
     },
     {
       "name": "integer_as_float",
-      "purpose": "Reject a floating-point value in an integer field.",
+      "purpose": "Reject a floating-point token in an integer field.",
       "direction": "server_to_client",
-      "message": {
-        "type": "welcome",
-        "protocol": "d2b-stream",
-        "version": "0.1",
-        "max_control_message_size": 2048,
-        "max_binary_frame_size": 32.0,
-        "session_state": "ready"
-      },
+      "message": "{\"type\":\"welcome\",\"protocol\":\"d2b-stream\",\"version\":\"0.1\",\"max_control_message_size\":2048,\"max_binary_frame_size\":32.0,\"session_state\":\"ready\"}",
       "expected_valid": false,
       "expected_error": "invalid_message"
     },
