@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>d2b-stream 0.1 browser reference vectors</title>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 1.5rem; color: #17202a; }
+      dl { display: grid; grid-template-columns: max-content 1fr; gap: .25rem .75rem; }
+      dt { font-weight: 600; } dd { margin: 0; overflow-wrap: anywhere; }
+      pre { padding: 1rem; background: #f4f6f7; }
+      table { border-collapse: collapse; width: 100%; font-size: .8rem; }
+      th, td { border: 1px solid #ccd1d1; padding: .4rem; vertical-align: top; text-align: left; overflow-wrap: anywhere; }
+      th { position: sticky; top: 0; background: #eaf2f8; }
+      tr.pass { background: #ebf5fb; } tr.fail { background: #fdedec; }
+    </style>
+    <script>
+      window.__d2bDiagnostics = { errors: [] };
+      window.addEventListener("error", (event) => window.__d2bDiagnostics.errors.push(`error: ${event.message}`));
+      window.addEventListener("unhandledrejection", (event) => window.__d2bDiagnostics.errors.push(`unhandled rejection: ${String(event.reason)}`));
+    </script>
+    <script type="module" src="./tests/test-page.js"></script>
+  </head>
+  <body>
+    <h1>d2b-stream 0.1 browser reference vector runner</h1>
+    <p>Static, dependency-free validation of tracked synthetic golden vectors.</p>
+    <main id="results" aria-live="polite">Loading vectors…</main>
+  </body>
+</html>
