@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 Yuichiroh-Kobayashi
+# SPDX-License-Identifier: Apache-2.0
 """Validate d2b-stream 0.1 schemas and golden fixtures.
 
 Only the Python standard library is used. This tool checks schema JSON syntax,

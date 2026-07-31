@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 Yuichiroh-Kobayashi
+# SPDX-License-Identifier: Apache-2.0
 """Generate the JSON-encoded d2b-stream 0.1 golden vectors."""
 
 from __future__ import annotations

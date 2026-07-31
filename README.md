@@ -65,5 +65,8 @@ browser application, binary recording, or runtime dependency.
 ## Status and license
 
 Version 0.1 is a pre-1.0 protocol. Compatibility rules are defined in the
-[versioning policy](docs/versioning-policy.md). Licensed under the MIT License;
-see [LICENSE](LICENSE).
+[versioning policy](docs/versioning-policy.md).
+
+Unless otherwise noted, the specifications, schemas, test vectors, and tools
+in this repository are licensed under the Apache License 2.0.
+Copyright 2026 Yuichiroh-Kobayashi. See [LICENSE](LICENSE).

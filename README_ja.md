@@ -110,4 +110,6 @@ python3 tools/generate_test_vectors.py
 Version `0.1`はpre-1.0段階のプロトコルです。互換性規則は
 [versioning policy](docs/versioning-policy.md)で定義しています。
 
-MIT Licenseで提供します。詳細は[LICENSE](LICENSE)を参照してください。
+特記のない限り、このリポジトリの仕様書、schema、test vectorおよびtoolは
+Apache License 2.0で提供します。
+Copyright 2026 Yuichiroh-Kobayashi. 詳細は[LICENSE](LICENSE)を参照してください。
