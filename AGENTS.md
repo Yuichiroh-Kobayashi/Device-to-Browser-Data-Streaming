@@ -23,7 +23,9 @@ Product-specific firmware belongs in the corresponding product repositories.
   interpolated, zero-filled, or removed from the time axis.
 - Acquisition producers MUST NOT block on WebSocket transmission, HTTP
   handling, filesystem writes, or browser behavior.
-- Version 0.1 supports at most one active streaming client.
+- Version 0.1 supports at most one active stream-session owner.
+- An implementation may advertise support for multiple READY control
+  connections.
 
 ## Initial profiles
 
@@ -57,7 +59,10 @@ C1 MUST NOT add:
 ## Working practices
 
 - Preserve UTF-8 text and LF line endings.
-- Do not commit generated files.
+- Do not commit transient generated files or build artifacts. Deterministically
+  generated golden JSON vectors under `test-vectors/` are reviewed protocol
+  source artifacts and MAY be committed when intentionally refreshed together
+  with their generator.
 - Run `git diff --check`.
 - Validate every JSON file before reporting completion.
 - Do not commit, push, create a pull request, or modify remotes unless the user

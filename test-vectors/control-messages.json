@@ -1,0 +1,658 @@
+{
+  "format": "d2b-stream-test-vectors/0.1",
+  "protocol": "d2b-stream",
+  "version": "0.1",
+  "vectors": [
+    {
+      "name": "client_hello",
+      "purpose": "Accept version negotiation.",
+      "direction": "client_to_server",
+      "message": {
+        "type": "hello",
+        "protocol": "d2b-stream",
+        "versions": [
+          "0.1"
+        ]
+      },
+      "expected_valid": true,
+      "context": {
+        "state": "CONNECTED",
+        "owns_stream": false
+      },
+      "expected_decoded": {
+        "type": "hello",
+        "protocol": "d2b-stream",
+        "versions": [
+          "0.1"
+        ]
+      }
+    },
+    {
+      "name": "client_hello_pairing",
+      "purpose": "Accept pairing-token authentication.",
+      "direction": "client_to_server",
+      "message": {
+        "type": "hello",
+        "protocol": "d2b-stream",
+        "versions": [
+          "0.1"
+        ],
+        "authentication": {
+          "scheme": "pairing-token",
+          "token": "classroom-token"
+        }
+      },
+      "expected_valid": true,
+      "expected_decoded": {
+        "type": "hello",
+        "protocol": "d2b-stream",
+        "versions": [
+          "0.1"
+        ],
+        "authentication": {
+          "scheme": "pairing-token",
+          "token": "classroom-token"
+        }
+      }
+    },
+    {
+      "name": "server_welcome",
+      "purpose": "Accept the negotiated limits.",
+      "direction": "server_to_client",
+      "message": {
+        "type": "welcome",
+        "protocol": "d2b-stream",
+        "version": "0.1",
+        "max_control_message_size": 2048,
+        "max_binary_frame_size": 65536,
+        "session_state": "ready"
+      },
+      "expected_valid": true,
+      "expected_decoded": {
+        "type": "welcome",
+        "protocol": "d2b-stream",
+        "version": "0.1",
+        "max_control_message_size": 2048,
+        "max_binary_frame_size": 65536,
+        "session_state": "ready"
+      }
+    },
+    {
+      "name": "client_start_vi",
+      "purpose": "Accept the standard V/I profile.",
+      "direction": "client_to_server",
+      "message": {
+        "type": "start_stream",
+        "stream": "measurement-0",
+        "profile": "vi-measurement",
+        "parameters": {
+          "sample_format": "vi-f32le",
+          "channel_count": 2,
+          "channel_mask": 3,
+          "sample_rate": {
+            "numerator": 0,
+            "denominator": 0
+          }
+        }
+      },
+      "expected_valid": true,
+      "context": {
+        "state": "READY",
+        "owns_stream": false
+      },
+      "expected_decoded": {
+        "type": "start_stream",
+        "stream": "measurement-0",
+        "profile": "vi-measurement",
+        "parameters": {
+          "sample_format": "vi-f32le",
+          "channel_count": 2,
+          "channel_mask": 3,
+          "sample_rate": {
+            "numerator": 0,
+            "denominator": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "client_start_pcm",
+      "purpose": "Accept the v0.1 PCM reference set.",
+      "direction": "client_to_server",
+      "message": {
+        "type": "start_stream",
+        "stream": "audio-0",
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        }
+      },
+      "expected_valid": true,
+      "context": {
+        "state": "READY",
+        "owns_stream": false
+      },
+      "expected_decoded": {
+        "type": "start_stream",
+        "stream": "audio-0",
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        }
+      }
+    },
+    {
+      "name": "server_started_pcm",
+      "purpose": "Confirm the exact PCM parameter set.",
+      "direction": "server_to_client",
+      "message": {
+        "type": "stream_started",
+        "stream": "audio-0",
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "stream_id": 7
+      },
+      "expected_valid": true,
+      "expected_decoded": {
+        "type": "stream_started",
+        "stream": "audio-0",
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "stream_id": 7
+      }
+    },
+    {
+      "name": "client_stop",
+      "purpose": "Accept a targeted stop.",
+      "direction": "client_to_server",
+      "message": {
+        "type": "stop_stream",
+        "stream_id": 7,
+        "reason": "capture complete"
+      },
+      "expected_valid": true,
+      "context": {
+        "state": "STREAMING",
+        "owns_stream": true
+      },
+      "expected_decoded": {
+        "type": "stop_stream",
+        "stream_id": 7,
+        "reason": "capture complete"
+      }
+    },
+    {
+      "name": "server_stopped",
+      "purpose": "Accept stream completion.",
+      "direction": "server_to_client",
+      "message": {
+        "type": "stream_stopped",
+        "stream_id": 7,
+        "reason": "capture complete"
+      },
+      "expected_valid": true,
+      "expected_decoded": {
+        "type": "stream_stopped",
+        "stream_id": 7,
+        "reason": "capture complete"
+      }
+    },
+    {
+      "name": "client_ping",
+      "purpose": "Accept a ping.",
+      "direction": "client_to_server",
+      "message": {
+        "type": "ping",
+        "correlation": "p-1"
+      },
+      "expected_valid": true,
+      "expected_decoded": {
+        "type": "ping",
+        "correlation": "p-1"
+      }
+    },
+    {
+      "name": "server_pong",
+      "purpose": "Accept the matching pong shape.",
+      "direction": "server_to_client",
+      "message": {
+        "type": "pong",
+        "correlation": "p-1"
+      },
+      "expected_valid": true,
+      "expected_decoded": {
+        "type": "pong",
+        "correlation": "p-1"
+      }
+    },
+    {
+      "name": "server_status",
+      "purpose": "Accept detailed authenticated control status.",
+      "direction": "server_to_client",
+      "message": {
+        "type": "status",
+        "state": "streaming",
+        "active_stream_id": 7,
+        "connected_client_count": 1,
+        "producer_drop_count": 2,
+        "output_queue_drop_count": 3,
+        "queued_sample_count": 8,
+        "source_paused": false,
+        "uptime_us": 123456
+      },
+      "expected_valid": true,
+      "expected_decoded": {
+        "type": "status",
+        "state": "streaming",
+        "active_stream_id": 7,
+        "connected_client_count": 1,
+        "producer_drop_count": 2,
+        "output_queue_drop_count": 3,
+        "queued_sample_count": 8,
+        "source_paused": false,
+        "uptime_us": 123456
+      }
+    },
+    {
+      "name": "server_unsupported_profile",
+      "purpose": "Represent explicit unknown-profile rejection.",
+      "direction": "server_to_client",
+      "message": {
+        "type": "error",
+        "code": "unsupported_profile",
+        "message": "profile is not supported",
+        "recoverable": true
+      },
+      "expected_valid": true,
+      "expected_decoded": {
+        "type": "error",
+        "code": "unsupported_profile",
+        "message": "profile is not supported",
+        "recoverable": true
+      }
+    },
+    {
+      "name": "unsupported_profile",
+      "purpose": "Reject an unknown profile without fallback.",
+      "direction": "client_to_server",
+      "message": {
+        "type": "start_stream",
+        "stream": "x",
+        "profile": "com.example.private",
+        "parameters": {}
+      },
+      "expected_valid": false,
+      "expected_error": "unsupported_profile"
+    },
+    {
+      "name": "invalid_channel_mask",
+      "purpose": "Reject impossible PCM channel count/mask combinations.",
+      "direction": "client_to_server",
+      "message": {
+        "type": "start_stream",
+        "stream": "audio-0",
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 2,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        }
+      },
+      "expected_valid": false,
+      "expected_error": "unsupported_parameters"
+    },
+    {
+      "name": "unsupported_pcm_rate",
+      "purpose": "Reject a non-reference PCM rate.",
+      "direction": "client_to_server",
+      "message": {
+        "type": "start_stream",
+        "stream": "audio-0",
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 48000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        }
+      },
+      "expected_valid": false,
+      "expected_error": "unsupported_parameters"
+    },
+    {
+      "name": "unsupported_pcm_frame_size",
+      "purpose": "Reject a non-reference PCM samples-per-frame value.",
+      "direction": "client_to_server",
+      "message": {
+        "type": "start_stream",
+        "stream": "audio-0",
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 128
+        }
+      },
+      "expected_valid": false,
+      "expected_error": "unsupported_parameters"
+    },
+    {
+      "name": "duplicate_json_key",
+      "purpose": "Reject duplicate object keys.",
+      "direction": "client_to_server",
+      "message": "{\"type\":\"ping\",\"correlation\":\"a\",\"correlation\":\"b\"}",
+      "expected_valid": false,
+      "expected_error": "invalid_message"
+    },
+    {
+      "name": "json_nan",
+      "purpose": "Reject NaN.",
+      "direction": "client_to_server",
+      "message": "{\"type\":\"ping\",\"correlation\":NaN}",
+      "expected_valid": false,
+      "expected_error": "invalid_message"
+    },
+    {
+      "name": "json_infinity",
+      "purpose": "Reject Infinity.",
+      "direction": "client_to_server",
+      "message": "{\"type\":\"ping\",\"correlation\":Infinity}",
+      "expected_valid": false,
+      "expected_error": "invalid_message"
+    },
+    {
+      "name": "json_negative_infinity",
+      "purpose": "Reject negative Infinity.",
+      "direction": "client_to_server",
+      "message": "{\"type\":\"ping\",\"correlation\":-Infinity}",
+      "expected_valid": false,
+      "expected_error": "invalid_message"
+    },
+    {
+      "name": "json_trailing_data",
+      "purpose": "Reject trailing JSON data.",
+      "direction": "client_to_server",
+      "message": "{\"type\":\"ping\",\"correlation\":\"a\"} false",
+      "expected_valid": false,
+      "expected_error": "invalid_message"
+    },
+    {
+      "name": "integer_as_float",
+      "purpose": "Reject a floating-point token in an integer field.",
+      "direction": "server_to_client",
+      "message": "{\"type\":\"welcome\",\"protocol\":\"d2b-stream\",\"version\":\"0.1\",\"max_control_message_size\":2048,\"max_binary_frame_size\":32.0,\"session_state\":\"ready\"}",
+      "expected_valid": false,
+      "expected_error": "invalid_message"
+    },
+    {
+      "name": "integer_out_of_range",
+      "purpose": "Reject an out-of-range stream ID.",
+      "direction": "server_to_client",
+      "message": {
+        "type": "stream_started",
+        "stream": "measurement-0",
+        "profile": "vi-measurement",
+        "parameters": {
+          "sample_format": "vi-f32le",
+          "channel_count": 2,
+          "channel_mask": 3,
+          "sample_rate": {
+            "numerator": 0,
+            "denominator": 0
+          }
+        },
+        "stream_id": 4294967296
+      },
+      "expected_valid": false,
+      "expected_error": "invalid_message"
+    },
+    {
+      "name": "type_mismatch",
+      "purpose": "Reject a string where an array is required.",
+      "direction": "client_to_server",
+      "message": {
+        "type": "hello",
+        "protocol": "d2b-stream",
+        "versions": "0.1"
+      },
+      "expected_valid": false,
+      "expected_error": "invalid_message"
+    },
+    {
+      "name": "unknown_message_enum",
+      "purpose": "Reject an unknown control type.",
+      "direction": "client_to_server",
+      "message": {
+        "type": "begin"
+      },
+      "expected_valid": false,
+      "expected_error": "invalid_message"
+    },
+    {
+      "name": "raw_control_too_large",
+      "purpose": "Enforce the raw 2048-byte limit.",
+      "direction": "client_to_server",
+      "message": "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ",
+      "expected_valid": false,
+      "expected_error": "frame_too_large"
+    },
+    {
+      "name": "invalid_utf8",
+      "purpose": "Reject invalid UTF-8 before JSON parsing.",
+      "direction": "client_to_server",
+      "message_hex": "ff",
+      "expected_valid": false,
+      "expected_error": "invalid_message"
+    },
+    {
+      "name": "start_before_hello",
+      "purpose": "Reject start_stream while CONNECTED.",
+      "direction": "client_to_server",
+      "message": {
+        "type": "start_stream",
+        "stream": "audio-0",
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        }
+      },
+      "expected_valid": false,
+      "context": {
+        "state": "CONNECTED",
+        "owns_stream": false
+      },
+      "expected_error": "invalid_state"
+    },
+    {
+      "name": "second_hello",
+      "purpose": "Reject a second hello while READY.",
+      "direction": "client_to_server",
+      "message": {
+        "type": "hello",
+        "protocol": "d2b-stream",
+        "versions": [
+          "0.1"
+        ]
+      },
+      "expected_valid": false,
+      "context": {
+        "state": "READY",
+        "owns_stream": false
+      },
+      "expected_error": "invalid_state"
+    },
+    {
+      "name": "stop_while_ready",
+      "purpose": "Reject stop_stream while READY.",
+      "direction": "client_to_server",
+      "message": {
+        "type": "stop_stream",
+        "stream_id": 7
+      },
+      "expected_valid": false,
+      "context": {
+        "state": "READY",
+        "owns_stream": false
+      },
+      "expected_error": "invalid_state"
+    },
+    {
+      "name": "start_while_streaming",
+      "purpose": "Reject start_stream while STREAMING.",
+      "direction": "client_to_server",
+      "message": {
+        "type": "start_stream",
+        "stream": "audio-0",
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        }
+      },
+      "expected_valid": false,
+      "context": {
+        "state": "STREAMING",
+        "owns_stream": true
+      },
+      "expected_error": "invalid_state"
+    },
+    {
+      "name": "non_owner_stop",
+      "purpose": "Reject stop_stream from a non-owner.",
+      "direction": "client_to_server",
+      "message": {
+        "type": "stop_stream",
+        "stream_id": 7
+      },
+      "expected_valid": false,
+      "context": {
+        "state": "STREAMING",
+        "owns_stream": false
+      },
+      "expected_error": "invalid_state"
+    },
+    {
+      "name": "message_while_closed",
+      "purpose": "Reject control input after CLOSED.",
+      "direction": "client_to_server",
+      "message": {
+        "type": "ping",
+        "correlation": "closed"
+      },
+      "expected_valid": false,
+      "context": {
+        "state": "CLOSED",
+        "owns_stream": false
+      },
+      "expected_error": "invalid_state"
+    },
+    {
+      "name": "second_client_busy",
+      "purpose": "Preserve the existing stream owner.",
+      "direction": "server_to_client",
+      "message": {
+        "type": "error",
+        "code": "busy",
+        "message": "stream already owned",
+        "recoverable": true
+      },
+      "expected_valid": true,
+      "context": {
+        "scenario": "second_client_busy",
+        "connection_a": {
+          "state": "streaming",
+          "owns_stream": true
+        },
+        "connection_b": {
+          "state": "ready",
+          "owns_stream": false
+        },
+        "request": {
+          "type": "start_stream",
+          "stream": "audio-0",
+          "profile": "pcm-audio",
+          "parameters": {
+            "sample_format": "pcm-s16le-interleaved",
+            "channel_count": 1,
+            "channel_mask": 1,
+            "sample_rate": {
+              "numerator": 16000,
+              "denominator": 1
+            },
+            "samples_per_frame": 256
+          }
+        },
+        "postcondition": {
+          "connection_a_state": "streaming",
+          "connection_a_owns_stream": true
+        }
+      },
+      "expected_decoded": {
+        "type": "error",
+        "code": "busy",
+        "message": "stream already owned",
+        "recoverable": true
+      }
+    }
+  ],
+  "schema_draft": "2020-12"
+}

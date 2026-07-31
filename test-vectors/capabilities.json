@@ -1,0 +1,578 @@
+{
+  "format": "d2b-stream-test-vectors/0.1",
+  "protocol": "d2b-stream",
+  "version": "0.1",
+  "vectors": [
+    {
+      "name": "capabilities_pcm_only",
+      "purpose": "Accept capabilities listing only the implemented standard profile.",
+      "document": {
+        "protocol": "d2b-stream",
+        "version": "0.1",
+        "maximum_binary_frame_size": 65536,
+        "maximum_control_message_size": 2048,
+        "maximum_active_stream_sessions": 1,
+        "maximum_control_connections": 1,
+        "persistent_capture_supported": false,
+        "security_mode": "pairing-token",
+        "streams": [
+          {
+            "id": "audio-0",
+            "label": "Audio input",
+            "profiles": [
+              {
+                "profile": "pcm-audio",
+                "parameter_sets": [
+                  {
+                    "sample_format": "pcm-s16le-interleaved",
+                    "channel_count": 1,
+                    "channel_mask": 1,
+                    "sample_rate": {
+                      "numerator": 16000,
+                      "denominator": 1
+                    },
+                    "samples_per_frame": 256
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "expected_valid": true,
+      "expected_decoded": {
+        "protocol": "d2b-stream",
+        "version": "0.1",
+        "maximum_binary_frame_size": 65536,
+        "maximum_control_message_size": 2048,
+        "maximum_active_stream_sessions": 1,
+        "maximum_control_connections": 1,
+        "persistent_capture_supported": false,
+        "security_mode": "pairing-token",
+        "streams": [
+          {
+            "id": "audio-0",
+            "label": "Audio input",
+            "profiles": [
+              {
+                "profile": "pcm-audio",
+                "parameter_sets": [
+                  {
+                    "sample_format": "pcm-s16le-interleaved",
+                    "channel_count": 1,
+                    "channel_mask": 1,
+                    "sample_rate": {
+                      "numerator": 16000,
+                      "denominator": 1
+                    },
+                    "samples_per_frame": 256
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "capabilities_missing_streams",
+      "purpose": "Reject a missing required field.",
+      "document": {
+        "protocol": "d2b-stream",
+        "version": "0.1",
+        "maximum_binary_frame_size": 65536,
+        "maximum_control_message_size": 2048,
+        "maximum_active_stream_sessions": 1,
+        "maximum_control_connections": 1,
+        "persistent_capture_supported": false,
+        "security_mode": "pairing-token"
+      },
+      "expected_valid": false,
+      "expected_error": "invalid_capabilities"
+    },
+    {
+      "name": "capabilities_zero_connections",
+      "purpose": "Reject zero control-connection capacity.",
+      "document": {
+        "protocol": "d2b-stream",
+        "version": "0.1",
+        "maximum_binary_frame_size": 65536,
+        "maximum_control_message_size": 2048,
+        "maximum_active_stream_sessions": 1,
+        "maximum_control_connections": 0,
+        "persistent_capture_supported": false,
+        "security_mode": "pairing-token",
+        "streams": [
+          {
+            "id": "audio-0",
+            "label": "Audio input",
+            "profiles": [
+              {
+                "profile": "pcm-audio",
+                "parameter_sets": [
+                  {
+                    "sample_format": "pcm-s16le-interleaved",
+                    "channel_count": 1,
+                    "channel_mask": 1,
+                    "sample_rate": {
+                      "numerator": 16000,
+                      "denominator": 1
+                    },
+                    "samples_per_frame": 256
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "expected_valid": false,
+      "expected_error": "invalid_capabilities"
+    },
+    {
+      "name": "capabilities_empty_parameter_sets",
+      "purpose": "Reject an empty parameter_sets array.",
+      "document": {
+        "protocol": "d2b-stream",
+        "version": "0.1",
+        "maximum_binary_frame_size": 65536,
+        "maximum_control_message_size": 2048,
+        "maximum_active_stream_sessions": 1,
+        "maximum_control_connections": 1,
+        "persistent_capture_supported": false,
+        "security_mode": "pairing-token",
+        "streams": [
+          {
+            "id": "audio-0",
+            "label": "Audio input",
+            "profiles": [
+              {
+                "profile": "pcm-audio",
+                "parameter_sets": []
+              }
+            ]
+          }
+        ]
+      },
+      "expected_valid": false,
+      "expected_error": "invalid_capabilities"
+    },
+    {
+      "name": "capabilities_unsupported_pcm",
+      "purpose": "Reject an advertised unsupported standard parameter set.",
+      "document": {
+        "protocol": "d2b-stream",
+        "version": "0.1",
+        "maximum_binary_frame_size": 65536,
+        "maximum_control_message_size": 2048,
+        "maximum_active_stream_sessions": 1,
+        "maximum_control_connections": 1,
+        "persistent_capture_supported": false,
+        "security_mode": "pairing-token",
+        "streams": [
+          {
+            "id": "audio-0",
+            "label": "Audio input",
+            "profiles": [
+              {
+                "profile": "pcm-audio",
+                "parameter_sets": [
+                  {
+                    "sample_format": "pcm-s16le-interleaved",
+                    "channel_count": 1,
+                    "channel_mask": 1,
+                    "sample_rate": {
+                      "numerator": 48000,
+                      "denominator": 1
+                    },
+                    "samples_per_frame": 256
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "expected_valid": false,
+      "expected_error": "invalid_capabilities"
+    },
+    {
+      "name": "capabilities_pcm_max_size_543",
+      "purpose": "Reject PCM capabilities whose maximum cannot carry one advertised frame.",
+      "document": {
+        "protocol": "d2b-stream",
+        "version": "0.1",
+        "maximum_binary_frame_size": 543,
+        "maximum_control_message_size": 2048,
+        "maximum_active_stream_sessions": 1,
+        "maximum_control_connections": 1,
+        "persistent_capture_supported": false,
+        "security_mode": "pairing-token",
+        "streams": [
+          {
+            "id": "audio-0",
+            "label": "Audio input",
+            "profiles": [
+              {
+                "profile": "pcm-audio",
+                "parameter_sets": [
+                  {
+                    "sample_format": "pcm-s16le-interleaved",
+                    "channel_count": 1,
+                    "channel_mask": 1,
+                    "sample_rate": {
+                      "numerator": 16000,
+                      "denominator": 1
+                    },
+                    "samples_per_frame": 256
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "expected_valid": false,
+      "expected_error": "invalid_capabilities"
+    },
+    {
+      "name": "capabilities_pcm_max_size_544",
+      "purpose": "Accept the exact minimum size for one v0.1 PCM frame.",
+      "document": {
+        "protocol": "d2b-stream",
+        "version": "0.1",
+        "maximum_binary_frame_size": 544,
+        "maximum_control_message_size": 2048,
+        "maximum_active_stream_sessions": 1,
+        "maximum_control_connections": 1,
+        "persistent_capture_supported": false,
+        "security_mode": "pairing-token",
+        "streams": [
+          {
+            "id": "audio-0",
+            "label": "Audio input",
+            "profiles": [
+              {
+                "profile": "pcm-audio",
+                "parameter_sets": [
+                  {
+                    "sample_format": "pcm-s16le-interleaved",
+                    "channel_count": 1,
+                    "channel_mask": 1,
+                    "sample_rate": {
+                      "numerator": 16000,
+                      "denominator": 1
+                    },
+                    "samples_per_frame": 256
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "expected_valid": true,
+      "expected_decoded": {
+        "protocol": "d2b-stream",
+        "version": "0.1",
+        "maximum_binary_frame_size": 544,
+        "maximum_control_message_size": 2048,
+        "maximum_active_stream_sessions": 1,
+        "maximum_control_connections": 1,
+        "persistent_capture_supported": false,
+        "security_mode": "pairing-token",
+        "streams": [
+          {
+            "id": "audio-0",
+            "label": "Audio input",
+            "profiles": [
+              {
+                "profile": "pcm-audio",
+                "parameter_sets": [
+                  {
+                    "sample_format": "pcm-s16le-interleaved",
+                    "channel_count": 1,
+                    "channel_mask": 1,
+                    "sample_rate": {
+                      "numerator": 16000,
+                      "denominator": 1
+                    },
+                    "samples_per_frame": 256
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "capabilities_vi_max_size_47",
+      "purpose": "Reject V/I capabilities whose maximum cannot carry one record.",
+      "document": {
+        "protocol": "d2b-stream",
+        "version": "0.1",
+        "maximum_binary_frame_size": 47,
+        "maximum_control_message_size": 2048,
+        "maximum_active_stream_sessions": 1,
+        "maximum_control_connections": 1,
+        "persistent_capture_supported": false,
+        "security_mode": "pairing-token",
+        "streams": [
+          {
+            "id": "measurement-0",
+            "label": "Voltage and current",
+            "profiles": [
+              {
+                "profile": "vi-measurement",
+                "parameter_sets": [
+                  {
+                    "sample_format": "vi-f32le",
+                    "channel_count": 2,
+                    "channel_mask": 3,
+                    "sample_rate": {
+                      "numerator": 0,
+                      "denominator": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "expected_valid": false,
+      "expected_error": "invalid_capabilities"
+    },
+    {
+      "name": "capabilities_vi_max_size_48",
+      "purpose": "Accept the exact minimum size for one V/I record.",
+      "document": {
+        "protocol": "d2b-stream",
+        "version": "0.1",
+        "maximum_binary_frame_size": 48,
+        "maximum_control_message_size": 2048,
+        "maximum_active_stream_sessions": 1,
+        "maximum_control_connections": 1,
+        "persistent_capture_supported": false,
+        "security_mode": "pairing-token",
+        "streams": [
+          {
+            "id": "measurement-0",
+            "label": "Voltage and current",
+            "profiles": [
+              {
+                "profile": "vi-measurement",
+                "parameter_sets": [
+                  {
+                    "sample_format": "vi-f32le",
+                    "channel_count": 2,
+                    "channel_mask": 3,
+                    "sample_rate": {
+                      "numerator": 0,
+                      "denominator": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "expected_valid": true,
+      "expected_decoded": {
+        "protocol": "d2b-stream",
+        "version": "0.1",
+        "maximum_binary_frame_size": 48,
+        "maximum_control_message_size": 2048,
+        "maximum_active_stream_sessions": 1,
+        "maximum_control_connections": 1,
+        "persistent_capture_supported": false,
+        "security_mode": "pairing-token",
+        "streams": [
+          {
+            "id": "measurement-0",
+            "label": "Voltage and current",
+            "profiles": [
+              {
+                "profile": "vi-measurement",
+                "parameter_sets": [
+                  {
+                    "sample_format": "vi-f32le",
+                    "channel_count": 2,
+                    "channel_mask": 3,
+                    "sample_rate": {
+                      "numerator": 0,
+                      "denominator": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "capabilities_duplicate_pcm_parameter_set",
+      "purpose": "Reject a duplicate complete parameter set within one profile.",
+      "document": {
+        "protocol": "d2b-stream",
+        "version": "0.1",
+        "maximum_binary_frame_size": 65536,
+        "maximum_control_message_size": 2048,
+        "maximum_active_stream_sessions": 1,
+        "maximum_control_connections": 1,
+        "persistent_capture_supported": false,
+        "security_mode": "pairing-token",
+        "streams": [
+          {
+            "id": "audio-0",
+            "label": "Audio input",
+            "profiles": [
+              {
+                "profile": "pcm-audio",
+                "parameter_sets": [
+                  {
+                    "sample_format": "pcm-s16le-interleaved",
+                    "channel_count": 1,
+                    "channel_mask": 1,
+                    "sample_rate": {
+                      "numerator": 16000,
+                      "denominator": 1
+                    },
+                    "samples_per_frame": 256
+                  },
+                  {
+                    "sample_format": "pcm-s16le-interleaved",
+                    "channel_count": 1,
+                    "channel_mask": 1,
+                    "sample_rate": {
+                      "numerator": 16000,
+                      "denominator": 1
+                    },
+                    "samples_per_frame": 256
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "expected_valid": false,
+      "expected_error": "invalid_capabilities"
+    },
+    {
+      "name": "capabilities_private_only",
+      "purpose": "Reject capabilities that advertise no standard profile.",
+      "document": {
+        "protocol": "d2b-stream",
+        "version": "0.1",
+        "maximum_binary_frame_size": 65536,
+        "maximum_control_message_size": 2048,
+        "maximum_active_stream_sessions": 1,
+        "maximum_control_connections": 1,
+        "persistent_capture_supported": false,
+        "security_mode": "pairing-token",
+        "streams": [
+          {
+            "id": "audio-0",
+            "label": "Audio input",
+            "profiles": [
+              {
+                "profile": "com.example.private",
+                "parameter_sets": [
+                  {}
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "expected_valid": false,
+      "expected_error": "invalid_capabilities"
+    },
+    {
+      "name": "capabilities_standard_plus_private",
+      "purpose": "Accept a standard profile advertised alongside a private profile.",
+      "document": {
+        "protocol": "d2b-stream",
+        "version": "0.1",
+        "maximum_binary_frame_size": 65536,
+        "maximum_control_message_size": 2048,
+        "maximum_active_stream_sessions": 1,
+        "maximum_control_connections": 1,
+        "persistent_capture_supported": false,
+        "security_mode": "pairing-token",
+        "streams": [
+          {
+            "id": "measurement-0",
+            "label": "Voltage and current",
+            "profiles": [
+              {
+                "profile": "vi-measurement",
+                "parameter_sets": [
+                  {
+                    "sample_format": "vi-f32le",
+                    "channel_count": 2,
+                    "channel_mask": 3,
+                    "sample_rate": {
+                      "numerator": 0,
+                      "denominator": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "profile": "com.example.private",
+                "parameter_sets": [
+                  {}
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "expected_valid": true,
+      "expected_decoded": {
+        "protocol": "d2b-stream",
+        "version": "0.1",
+        "maximum_binary_frame_size": 65536,
+        "maximum_control_message_size": 2048,
+        "maximum_active_stream_sessions": 1,
+        "maximum_control_connections": 1,
+        "persistent_capture_supported": false,
+        "security_mode": "pairing-token",
+        "streams": [
+          {
+            "id": "measurement-0",
+            "label": "Voltage and current",
+            "profiles": [
+              {
+                "profile": "vi-measurement",
+                "parameter_sets": [
+                  {
+                    "sample_format": "vi-f32le",
+                    "channel_count": 2,
+                    "channel_mask": 3,
+                    "sample_rate": {
+                      "numerator": 0,
+                      "denominator": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "profile": "com.example.private",
+                "parameter_sets": [
+                  {}
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "schema_draft": "2020-12"
+}

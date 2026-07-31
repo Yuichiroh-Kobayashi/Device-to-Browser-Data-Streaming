@@ -1,0 +1,636 @@
+{
+  "format": "d2b-stream-test-vectors/0.1",
+  "protocol": "d2b-stream",
+  "version": "0.1",
+  "vectors": [
+    {
+      "name": "pcm_first_frame",
+      "purpose": "Decode the v0.1 PCM reference frame.",
+      "frame_hex": "44324253000101011500000000010000000000000000000080841e000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff7f",
+      "expected_valid": true,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_decoded": {
+        "sample_count": 256,
+        "payload_length": 512,
+        "stream_start": true,
+        "first_pcm_value": -32768,
+        "gap_samples": 0
+      }
+    },
+    {
+      "name": "pcm_continuous_frame",
+      "purpose": "Decode the next anchored PCM frame.",
+      "frame_hex": "44324253000101001500000000010000000100000000000000c31e000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff7f",
+      "expected_valid": true,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "previous_first_sample_sequence": 0,
+        "previous_sample_count": 256,
+        "previous_first_timestamp_us": 2000000,
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_decoded": {
+        "first_sample_sequence": 256,
+        "pcm_timestamp_within_1us": true,
+        "gap_samples": 0
+      }
+    },
+    {
+      "name": "pcm_producer_overflow_gap",
+      "purpose": "Require producer overflow to retain missing logical positions.",
+      "frame_hex": "443242530001010c1500000000010000000200000000000080011f000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff7f",
+      "expected_valid": true,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "previous_first_sample_sequence": 0,
+        "previous_sample_count": 256,
+        "previous_first_timestamp_us": 2000000,
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_decoded": {
+        "producer_overflow": true,
+        "gap_samples": 256
+      }
+    },
+    {
+      "name": "pcm_source_paused",
+      "purpose": "Retain paused logical sample positions as a sequence gap.",
+      "frame_hex": "44324253000101241500000000010000000200000000000080011f000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff7f",
+      "expected_valid": true,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "previous_first_sample_sequence": 0,
+        "previous_sample_count": 256,
+        "previous_first_timestamp_us": 2000000,
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_decoded": {
+        "source_paused": true,
+        "discontinuity": true,
+        "gap_samples": 256,
+        "pcm_expected_timestamp_floor_us": 2032000
+      }
+    },
+    {
+      "name": "pcm_output_queue_gap",
+      "purpose": "Preserve a PCM gap and cause.",
+      "frame_hex": "44324253000101141500000000010000000200000000000080011f000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff7f",
+      "expected_valid": true,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "previous_first_sample_sequence": 0,
+        "previous_sample_count": 256,
+        "previous_first_timestamp_us": 2000000,
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_decoded": {
+        "gap_samples": 256,
+        "output_queue_drop": true
+      }
+    },
+    {
+      "name": "pcm_producer_cause_without_gap",
+      "purpose": "Reject producer overflow without missing logical positions.",
+      "frame_hex": "443242530001010c1500000000010000000100000000000000c31e000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff7f",
+      "expected_valid": false,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "previous_first_sample_sequence": 0,
+        "previous_sample_count": 256,
+        "previous_first_timestamp_us": 2000000,
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_error": "cause_flag_without_gap"
+    },
+    {
+      "name": "pcm_output_cause_without_gap",
+      "purpose": "Reject output queue drop without missing logical positions.",
+      "frame_hex": "44324253000101141500000000010000000100000000000000c31e000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff7f",
+      "expected_valid": false,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "previous_first_sample_sequence": 0,
+        "previous_sample_count": 256,
+        "previous_first_timestamp_us": 2000000,
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_error": "cause_flag_without_gap"
+    },
+    {
+      "name": "pcm_pause_cause_without_gap",
+      "purpose": "Reject SOURCE_PAUSED without missing logical positions.",
+      "frame_hex": "44324253000101241500000000010000000100000000000000c31e000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff7f",
+      "expected_valid": false,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "previous_first_sample_sequence": 0,
+        "previous_sample_count": 256,
+        "previous_first_timestamp_us": 2000000,
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_error": "cause_flag_without_gap"
+    },
+    {
+      "name": "binary_before_stream_started",
+      "purpose": "Reject binary data while the control session is READY.",
+      "frame_hex": "44324253000101011500000000010000000000000000000080841e000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff7f",
+      "expected_valid": false,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "READY",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_error": "invalid_state"
+    },
+    {
+      "name": "binary_maximum_size_exceeded",
+      "purpose": "Reject a binary message beyond the negotiated maximum.",
+      "frame_hex": "44324253000101011500000000010000000000000000000080841e000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff7f",
+      "expected_valid": false,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 32,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_error": "frame_too_large"
+    },
+    {
+      "name": "pcm_payload_too_short",
+      "purpose": "Reject one-byte truncation.",
+      "frame_hex": "44324253000101011500000000010000000000000000000080841e000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff",
+      "expected_valid": false,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_error": "pcm_payload_length_mismatch"
+    },
+    {
+      "name": "pcm_payload_too_long",
+      "purpose": "Reject one-byte extension.",
+      "frame_hex": "44324253000101011500000000010000000000000000000080841e000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff7f00",
+      "expected_valid": false,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_error": "pcm_payload_length_mismatch"
+    },
+    {
+      "name": "pcm_sample_count_zero",
+      "purpose": "Reject zero samples in a data frame.",
+      "frame_hex": "44324253000101011500000000000000000000000000000080841e0000000000",
+      "expected_valid": false,
+      "expected_error": "sample_count_zero"
+    },
+    {
+      "name": "pcm_unsupported_frame_count",
+      "purpose": "Reject a non-reference PCM frame count.",
+      "frame_hex": "443242530001010115000000ff000000000000000000000080841e000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7e",
+      "expected_valid": false,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_error": "pcm_sample_count_mismatch"
+    },
+    {
+      "name": "pcm_sequence_overflow",
+      "purpose": "Reject sample sequence arithmetic overflow.",
+      "frame_hex": "4432425300010101150000000001000001ffffffffffffff80841e000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff7f",
+      "expected_valid": false,
+      "expected_error": "sequence_overflow"
+    },
+    {
+      "name": "pcm_reserved_flag",
+      "purpose": "Reject the reserved bit.",
+      "frame_hex": "44324253000101811500000000010000000000000000000080841e000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff7f",
+      "expected_valid": false,
+      "expected_error": "reserved_flag_set"
+    },
+    {
+      "name": "pcm_missing_stream_start",
+      "purpose": "Require STREAM_START on the first PCM frame.",
+      "frame_hex": "44324253000101001500000000010000000000000000000080841e000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff7f",
+      "expected_valid": false,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_error": "missing_stream_start"
+    },
+    {
+      "name": "pcm_repeated_stream_start",
+      "purpose": "Reject repeated STREAM_START.",
+      "frame_hex": "44324253000101011500000000010000000100000000000000c31e000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff7f",
+      "expected_valid": false,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "previous_first_sample_sequence": 0,
+        "previous_sample_count": 256,
+        "previous_first_timestamp_us": 2000000,
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_error": "unexpected_stream_start"
+    },
+    {
+      "name": "pcm_stream_id_mismatch",
+      "purpose": "Reject another stream ID.",
+      "frame_hex": "44324253000101011600000000010000000000000000000080841e000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff7f",
+      "expected_valid": false,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_error": "stream_id_mismatch"
+    },
+    {
+      "name": "pcm_sequence_regression",
+      "purpose": "Reject sequence regression.",
+      "frame_hex": "44324253000101001500000000010000ff00000000000000c2c21e000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff7f",
+      "expected_valid": false,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "previous_first_sample_sequence": 0,
+        "previous_sample_count": 256,
+        "previous_first_timestamp_us": 2000000,
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_error": "sequence_regression"
+    },
+    {
+      "name": "pcm_unexplained_sequence_gap",
+      "purpose": "Reject a PCM gap without DISCONTINUITY.",
+      "frame_hex": "44324253000101001500000000010000000200000000000080011f000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff7f",
+      "expected_valid": false,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "previous_first_sample_sequence": 0,
+        "previous_sample_count": 256,
+        "previous_first_timestamp_us": 2000000,
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_error": "missing_discontinuity_flag"
+    },
+    {
+      "name": "pcm_timestamp_outside_tolerance",
+      "purpose": "Reject an anchor-derived timestamp error.",
+      "frame_hex": "44324253000101001500000000010000000100000000000002c31e000000000000800181028203830484058506860787088809890a8a0b8b0c8c0d8d0e8e0f8f10901191129213931494159516961797189819991a9a1b9b1c9c1d9d1e9e1f9f20a021a122a223a324a425a526a627a728a829a92aaa2bab2cac2dad2eae2faf30b031b132b233b334b435b536b637b738b839b93aba3bbb3cbc3dbd3ebe3fbf40c041c142c243c344c445c546c647c748c849c94aca4bcb4ccc4dcd4ece4fcf50d051d152d253d354d455d556d657d758d859d95ada5bdb5cdc5ddd5ede5fdf60e061e162e263e364e465e566e667e768e869e96aea6beb6cec6ded6eee6fef70f071f172f273f374f475f576f677f778f879f97afa7bfb7cfc7dfd7efe7fff80008101820283038404850586068707880889098a0a8b0b8c0c8d0d8e0e8f0f90109111921293139414951596169717981899199a1a9b1b9c1c9d1d9e1e9f1fa020a121a222a323a424a525a626a727a828a929aa2aab2bac2cad2dae2eaf2fb030b131b232b333b434b535b636b737b838b939ba3abb3bbc3cbd3dbe3ebf3fc040c141c242c343c444c545c646c747c848c949ca4acb4bcc4ccd4dce4ecf4fd050d151d252d353d454d555d656d757d858d959da5adb5bdc5cdd5dde5edf5fe060e161e262e363e464e565e666e767e868e969ea6aeb6bec6ced6dee6eef6ff070f171f272f373f474f575f676f777f878f979fa7afb7bfc7cfd7dfe7eff7f",
+      "expected_valid": false,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "previous_first_sample_sequence": 0,
+        "previous_sample_count": 256,
+        "previous_first_timestamp_us": 2000000,
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_error": "pcm_timestamp_out_of_tolerance"
+    },
+    {
+      "name": "pcm_profile_mismatch",
+      "purpose": "Reject a timestamped V/I-shaped frame as PCM.",
+      "frame_hex": "44324253000102011500000001000000000000000000000080841e000000000000000000030000000000803f0000803f",
+      "expected_valid": false,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_error": "pcm_frame_type_mismatch"
+    },
+    {
+      "name": "pcm_stream_end",
+      "purpose": "Accept a PCM stream end marker.",
+      "frame_hex": "44324253000110021500000000000000000100000000000000c31e0000000000",
+      "expected_valid": true,
+      "context": {
+        "negotiated_version": "0.1",
+        "session_state": "STREAMING",
+        "maximum_binary_frame_size": 65536,
+        "stream_id": 21,
+        "profile": "pcm-audio",
+        "parameters": {
+          "sample_format": "pcm-s16le-interleaved",
+          "channel_count": 1,
+          "channel_mask": 1,
+          "sample_rate": {
+            "numerator": 16000,
+            "denominator": 1
+          },
+          "samples_per_frame": 256
+        },
+        "previous_first_sample_sequence": 0,
+        "previous_sample_count": 256,
+        "previous_first_timestamp_us": 2000000,
+        "session_anchor_sequence": 0,
+        "session_anchor_timestamp_us": 2000000
+      },
+      "expected_decoded": {
+        "stream_end": true,
+        "sample_count": 0,
+        "payload_length": 0
+      }
+    }
+  ],
+  "profile": "pcm-audio"
+}
