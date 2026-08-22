@@ -26,6 +26,12 @@ A minor version MAY add registry values, profiles, or extensions, but MUST NOT
 change an earlier negotiated version's field meanings. Registry values MUST NOT
 be reassigned; deprecated values remain reserved.
 
+Public Status Standard R1 is a named conformance revision of the existing
+version 0.1 HTTP endpoint and is not carried in the response body. Its schema is
+closed because current strict consumers reject unknown fields. Adding a public
+status field requires a new named public-status revision and a coordinated
+producer/consumer update; an implementation MUST NOT silently widen R1.
+
 ## 2. Profile evolution
 
 A new standard profile requires a complete profile specification, negotiated

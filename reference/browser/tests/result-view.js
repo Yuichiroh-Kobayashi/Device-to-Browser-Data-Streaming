@@ -26,7 +26,7 @@ export function renderResults(target, run, selfTests, metadata) {
   target.append(metadataList);
 
   const summary = document.createElement("pre");
-  summary.textContent = [`Golden vectors ${run.pass}/${run.total}`, ...["control", "capabilities", "V/I", "PCM"].map((category) => `${category}: ${run.summaries[category].pass}/${run.summaries[category].total}`), `total: ${run.pass}/${run.total}`, `FAIL: ${run.fail}`, "", `Parser-core self-tests ${selfTests.fail === 0 ? "all PASS" : `${selfTests.pass}/${selfTests.total}`}`, `count: ${selfTests.pass}/${selfTests.total}`, `FAIL: ${selfTests.fail}`].join("\n");
+  summary.textContent = [`Golden vectors ${run.pass}/${run.total}`, ...["control", "capabilities", "public-status", "V/I", "PCM"].map((category) => `${category}: ${run.summaries[category].pass}/${run.summaries[category].total}`), `total: ${run.pass}/${run.total}`, `FAIL: ${run.fail}`, "", `Parser-core self-tests ${selfTests.fail === 0 ? "all PASS" : `${selfTests.pass}/${selfTests.total}`}`, `count: ${selfTests.pass}/${selfTests.total}`, `FAIL: ${selfTests.fail}`].join("\n");
   target.append(summary);
 
   const selfTestList = document.createElement("ul");

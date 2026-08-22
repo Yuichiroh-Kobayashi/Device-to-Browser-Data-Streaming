@@ -3,6 +3,7 @@
 const VECTOR_SOURCES = Object.freeze([
   ["control", "../../../test-vectors/control-messages.json"],
   ["capabilities", "../../../test-vectors/capabilities.json"],
+  ["public-status", "../../../test-vectors/public-status.json"],
   ["V/I", "../../../test-vectors/vi-frames.json"],
   ["PCM", "../../../test-vectors/pcm-audio-frames.json"],
 ]);

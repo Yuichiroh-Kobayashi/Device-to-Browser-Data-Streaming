@@ -55,6 +55,20 @@ syntax, field shape, type, and range; after that, semantic dispatch returns
 unsupported requests. State validation is performed separately and returns
 `invalid_state` for a shape-valid message not allowed in the current state.
 
+## Public status validation
+
+`validatePublicStatus(value)` validates an already parsed
+`GET /d2b/v0/status` value against Public Status Standard R1. It requires the
+four identity/state fields, accepts only the four named optional metrics,
+rejects unknown fields, and applies `Number.isSafeInteger` without coercion or
+default insertion. Success returns the same object. Failure throws
+`ProtocolError` with local code `invalid_public_status`; this code is not a new
+WebSocket wire `error.code`.
+
+Public status uses parsed JSON value semantics. Unlike strict control-message
+parsing, it does not distinguish the JSON text spellings `1` and `1.0` when
+both parse to the same mathematical integer.
+
 ## Gap-aware dispatch
 
 The common decoder starts a new segment on every discontinuity and every new
@@ -64,5 +78,5 @@ as measurement time, or merge a reconnect into the old session. Exporters apply
 the explicit SenML and WAV policies in the profile documents.
 
 The executable standard-library counterpart for these checks is
-`tools/validate_test_vectors.py`; the browser implementation is intentionally a
-later work item.
+`tools/validate_test_vectors.py`. The dependency-free browser reference runs the
+same tracked public-status vector corpus as the Python validator.

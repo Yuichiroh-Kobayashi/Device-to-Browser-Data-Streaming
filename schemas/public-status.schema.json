@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:d2b-stream:0.1:public-status:r1",
+  "title": "d2b-stream 0.1 Public Status Standard R1",
+  "description": "Closed public redacted status representation for GET /d2b/v0/status.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol",
+    "version",
+    "state",
+    "uptime_us"
+  ],
+  "properties": {
+    "protocol": {
+      "const": "d2b-stream"
+    },
+    "version": {
+      "const": "0.1"
+    },
+    "state": {
+      "enum": [
+        "idle",
+        "streaming"
+      ]
+    },
+    "uptime_us": {
+      "$ref": "#/$defs/safeUnsignedInteger"
+    },
+    "producer_drop_count": {
+      "$ref": "#/$defs/safeUnsignedInteger"
+    },
+    "output_queue_drop_count": {
+      "$ref": "#/$defs/safeUnsignedInteger"
+    },
+    "queued_sample_count": {
+      "$ref": "#/$defs/safeUnsignedInteger"
+    },
+    "connected_client_count": {
+      "$ref": "#/$defs/safeUnsignedInteger"
+    }
+  },
+  "$defs": {
+    "safeUnsignedInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    }
+  }
+}

@@ -16,6 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "test-vectors"
 ENVELOPE = struct.Struct("<4sBBBBIIQQ")
 VI_RECORD = struct.Struct("<IIff")
+SAFE_UINT_MAX = 9007199254740991
+PUBLIC_STATUS_SCHEMA_ID = "urn:d2b-stream:0.1:public-status:r1"
 
 FRAME_FIXED_RATE = 0x01
 FRAME_TIMESTAMPED = 0x02
@@ -392,6 +394,96 @@ def capabilities_vectors() -> list[dict[str, Any]]:
     ]
 
 
+def public_status_vector(
+    name: str,
+    purpose: str,
+    category: str,
+    value: Any,
+    *,
+    valid: bool,
+) -> dict[str, Any]:
+    result: dict[str, Any] = {
+        "name": name,
+        "purpose": purpose,
+        "category": category,
+        "document": value,
+        "expected_valid": valid,
+    }
+    if valid:
+        result["expected_decoded"] = value
+    else:
+        result["expected_error"] = "invalid_public_status"
+    return result
+
+
+def public_status_vectors() -> list[dict[str, Any]]:
+    required_idle = {
+        "protocol": "d2b-stream",
+        "version": "0.1",
+        "state": "idle",
+        "uptime_us": 0,
+    }
+
+    def changed(**updates: Any) -> dict[str, Any]:
+        result = dict(required_idle)
+        result.update(updates)
+        return result
+
+    def without(field: str) -> dict[str, Any]:
+        result = dict(required_idle)
+        del result[field]
+        return result
+
+    all_zero = changed(
+        producer_drop_count=0,
+        output_queue_drop_count=0,
+        queued_sample_count=0,
+        connected_client_count=0,
+    )
+    all_nonzero = changed(
+        state="streaming",
+        uptime_us=123456,
+        producer_drop_count=2,
+        output_queue_drop_count=3,
+        queued_sample_count=8,
+        connected_client_count=1,
+    )
+    return [
+        public_status_vector("public_status_required_idle", "Accept the four required fields in idle state.", "positive", required_idle, valid=True),
+        public_status_vector("public_status_required_streaming", "Accept the four required fields in streaming state.", "positive", changed(state="streaming", uptime_us=1), valid=True),
+        public_status_vector("public_status_all_optional_zero", "Accept all optional metrics at zero.", "positive", all_zero, valid=True),
+        public_status_vector("public_status_all_optional_nonzero", "Accept the current full representation with nonzero metrics.", "positive", all_nonzero, valid=True),
+        public_status_vector("public_status_safe_max_cumulative", "Accept the browser-safe maximum for uptime and cumulative counters.", "positive", changed(uptime_us=SAFE_UINT_MAX, producer_drop_count=SAFE_UINT_MAX, output_queue_drop_count=SAFE_UINT_MAX), valid=True),
+        public_status_vector("public_status_safe_max_gauges", "Accept the browser-safe maximum for both optional gauges.", "positive", changed(queued_sample_count=SAFE_UINT_MAX, connected_client_count=SAFE_UINT_MAX), valid=True),
+        public_status_vector("public_status_mixed_optional_subset", "Accept any subset of the named optional metrics without default insertion.", "positive", changed(producer_drop_count=4, connected_client_count=2), valid=True),
+        public_status_vector("public_status_integral_decimal", "Accept an integral parsed JSON number regardless of its 1.0 text spelling.", "positive", changed(uptime_us=1.0), valid=True),
+        public_status_vector("public_status_root_array", "Reject a non-object root value.", "structural", [], valid=False),
+        public_status_vector("public_status_missing_protocol", "Reject a missing protocol field.", "structural", without("protocol"), valid=False),
+        public_status_vector("public_status_wrong_protocol", "Reject the wrong protocol identity.", "structural", changed(protocol="other-stream"), valid=False),
+        public_status_vector("public_status_missing_version", "Reject a missing version field.", "structural", without("version"), valid=False),
+        public_status_vector("public_status_wrong_version", "Reject the wrong protocol version.", "structural", changed(version="0.2"), valid=False),
+        public_status_vector("public_status_missing_state", "Reject a missing state field.", "structural", without("state"), valid=False),
+        public_status_vector("public_status_unknown_state", "Reject a public state extension not defined by R1.", "structural", changed(state="fault"), valid=False),
+        public_status_vector("public_status_missing_uptime", "Reject a missing uptime_us field.", "structural", without("uptime_us"), valid=False),
+        public_status_vector("public_status_negative_uptime", "Reject negative uptime_us.", "numeric", changed(uptime_us=-1), valid=False),
+        public_status_vector("public_status_fractional_uptime", "Reject fractional uptime_us.", "numeric", changed(uptime_us=0.5), valid=False),
+        public_status_vector("public_status_unsafe_uptime", "Reject uptime_us above the browser-safe maximum.", "numeric", changed(uptime_us=SAFE_UINT_MAX + 1), valid=False),
+        public_status_vector("public_status_negative_metric", "Reject a negative optional metric.", "numeric", changed(producer_drop_count=-1), valid=False),
+        public_status_vector("public_status_fractional_metric", "Reject a fractional optional metric.", "numeric", changed(output_queue_drop_count=0.5), valid=False),
+        public_status_vector("public_status_unsafe_metric", "Reject an optional metric above the browser-safe maximum.", "numeric", changed(queued_sample_count=SAFE_UINT_MAX + 1), valid=False),
+        public_status_vector("public_status_unknown_field", "Reject an unregistered field, including an in-band schema version.", "structural", changed(schema_version=1), valid=False),
+        public_status_vector("public_status_null_numeric", "Reject null in a numeric field.", "structural", changed(uptime_us=None), valid=False),
+        public_status_vector("public_status_string_integer", "Reject an integer encoded as a string.", "structural", changed(producer_drop_count="1"), valid=False),
+        public_status_vector("public_status_authentication_injection", "Reject authentication or token material in public status.", "privacy", changed(authentication={"scheme": "pairing-token"}, token="secret"), valid=False),
+        public_status_vector("public_status_stream_id_injection", "Reject stream or session identifiers in public status.", "privacy", changed(stream_id=7, session_id="private-session"), valid=False),
+        public_status_vector("public_status_client_identity_injection", "Reject client identity in public status.", "privacy", changed(client_id="student-browser"), valid=False),
+        public_status_vector("public_status_device_identifier_injection", "Reject MAC, IP, and device serial identifiers in public status.", "privacy", changed(mac_address="00:11:22:33:44:55", ip_address="192.0.2.1", device_serial="SERIAL-1"), valid=False),
+        public_status_vector("public_status_raw_measurement_injection", "Reject raw voltage or current measurements in public status.", "privacy", changed(voltage=1.5, current=0.2), valid=False),
+        public_status_vector("public_status_filesystem_injection", "Reject filesystem paths and filenames in public status.", "privacy", changed(file_path="/records/private.csv", filename="private.csv"), valid=False),
+        public_status_vector("public_status_private_error_injection", "Reject private implementation error detail in public status.", "privacy", changed(last_error={"code": "internal", "detail": "private"}), valid=False),
+    ]
+
+
 def document(vectors: list[dict[str, Any]], *, profile: str | None = None) -> dict[str, Any]:
     result: dict[str, Any] = {
         "format": "d2b-stream-test-vectors/0.1",
@@ -419,7 +511,10 @@ def main() -> int:
     write("capabilities.json", document(capabilities_vectors()))
     write("vi-frames.json", document(vi_vectors(), profile="vi-measurement"))
     write("pcm-audio-frames.json", document(pcm_vectors(), profile="pcm-audio"))
-    print("Generated control, capabilities, V/I, and PCM golden vectors.")
+    public_status = document(public_status_vectors())
+    public_status["schema_id"] = PUBLIC_STATUS_SCHEMA_ID
+    write("public-status.json", public_status)
+    print("Generated control, capabilities, public status, V/I, and PCM golden vectors.")
     return 0
 
 

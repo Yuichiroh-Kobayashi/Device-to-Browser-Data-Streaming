@@ -369,6 +369,14 @@ object, client identity, stream ID, detailed session parameters, or raw data.
 It MAY expose the protocol/version, `idle` or `streaming` state, monotonic uptime,
 and bounded aggregate counters.
 
+An implementation that claims [Public Status Standard R1](public-status-standard-r1.md)
+conformance MUST use the closed representation in
+`schemas/public-status.schema.json`. R1 requires `protocol`, `version`, `state`,
+and `uptime_us`; defines four optional aggregate metrics; and adds exact numeric,
+restart, HTTP media-type, and privacy requirements. R1 is a named conformance
+revision of this existing version 0.1 endpoint, not a wire-negotiated feature.
+Its identifier does not appear in the response body.
+
 The WebSocket `status` message is sent only after `hello` and, when configured,
 successful authentication. It MAY include the schema-defined active stream ID,
 queue state, `producer_drop_count`, `output_queue_drop_count`, source pause, and

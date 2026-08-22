@@ -85,7 +85,29 @@ For display, downsample or aggregate explicitly and keep the raw capture model
 separate. For export, include gap markers rather than inventing samples. Use
 bounded in-memory chunks and an explicit record/download action.
 
-## 7. Defensive checks
+## 7. Public status implementation
+
+Build public status from an explicit redacted snapshot; do not serialize the
+authenticated WebSocket status object and remove selected fields afterward.
+Set `Content-Type: application/json` and `Cache-Control: no-store` on successful
+responses. Saturate every reported numeric field at the browser-safe maximum.
+
+Drop and queue metrics use logical sample-frame units. If an output queue node
+batches multiple logical sample frames, add its sample count to a drop counter
+and queue gauge rather than adding one. Omit an optional metric if that unit
+cannot be reported accurately. Do not turn omission into a synthesized zero.
+
+A one-connection server can implement `connected_client_count` as the presence
+of its sole control connection. A server that permits multiple `READY` control
+connections must count all current control connections, not only the active
+stream owner. Keep product queue capacities and connection limits outside the
+vendor-neutral R1 schema.
+
+Consumers should start a new cumulative-counter baseline after a detected
+restart or whenever boot continuity across a reconnect is unknown. They should
+not calculate deltas for gauges or for saturated cumulative counters.
+
+## 8. Defensive checks
 
 Fuzz short envelopes, huge count products, reserved flags, unsupported profiles,
 invalid or truncated UTF-8, duplicate JSON keys, non-finite JSON numbers,
@@ -96,7 +118,7 @@ attempts, and disconnects during backpressure. All queues and logs should have
 hard bounds. Tests should demonstrate that network stalls never stall the
 acquisition producer.
 
-## 8. Optional Arduino Serial Plotter diagnostic adapter
+## 9. Optional Arduino Serial Plotter diagnostic adapter
 
 For USB serial bring-up, debugging, simple classroom plotting, or diagnosis of
 a failed WebSocket path, an implementation may emit a separate text adapter:

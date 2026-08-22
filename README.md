@@ -28,6 +28,11 @@ Start with the [protocol specification](docs/protocol-v0.1.md). The
 and profile documents provide the remaining details required for an independent
 implementation.
 
+[Public Status Standard R1](docs/public-status-standard-r1.md) formalizes the
+existing `/d2b/v0/status` response as a closed, browser-safe, redacted version
+0.1 representation. R1 is named in conformance material and is not added to the
+response body.
+
 The [prior-art and protocol-selection report](docs/prior-art-and-protocol-selection.md)
 explains why the profile combines existing web standards instead of adopting a
 serial, BLE, brokered, or laboratory streaming stack wholesale. The V/I
@@ -38,13 +43,13 @@ and interoperability layer without replacing the compact live binary profile.
 
 - `docs/`: normative application-profile, profile, security, compatibility,
   prior-art, interoperability, and validation documents;
-- `schemas/`: self-contained JSON Schema Draft 2020-12 control-message and
-  capabilities schemas;
-- `test-vectors/`: JSON-encoded golden control, capabilities, and binary frame
-  vectors;
+- `schemas/`: self-contained JSON Schema Draft 2020-12 control-message,
+  capabilities, and public-status schemas;
+- `test-vectors/`: JSON-encoded golden control, capabilities, public-status,
+  and binary frame vectors;
 - `tools/validate_test_vectors.py`: standard-library-only manual validator for
-  schema structure, strict control fixtures, binary frames, continuity, and
-  targeted mutation tests;
+  schema structure, strict control and public-status fixtures, binary frames,
+  continuity, and targeted mutation tests;
 - `tools/generate_test_vectors.py`: deterministic standard-library generator
   for all JSON-encoded golden vectors.
 

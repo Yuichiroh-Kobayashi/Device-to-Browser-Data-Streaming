@@ -5,6 +5,7 @@ import { parseControlMessageText } from "../src/control-parser.js";
 import { cloneDecoderState, createDecoderState } from "../src/decoder-state.js";
 import { decodeBinaryFrame } from "../src/decoder.js";
 import { ProtocolError } from "../src/errors.js";
+import { validatePublicStatus } from "../src/public-status-validator.js";
 import { runBinaryVector, runVectorDocuments } from "./vector-runner.js";
 
 function cloneJson(value) {
@@ -65,7 +66,7 @@ function runTest(name, action) {
   }
 }
 
-/** Dependency-free parser-core regressions, distinct from the 95 golden vectors. */
+/** Dependency-free parser-core regressions, distinct from the tracked golden vectors. */
 export function runParserCoreSelfTests(entries) {
   const pcmVector = firstFreshValidFrame(documentFor(entries, "PCM"));
   const viVector = firstFreshValidFrame(documentFor(entries, "V/I"));
@@ -74,6 +75,21 @@ export function runParserCoreSelfTests(entries) {
   const pcmBytes = bytesFromHex(pcmVector.frame_hex).buffer;
   const viBytes = bytesFromHex(viVector.frame_hex).buffer;
   const results = [];
+
+  results.push(runTest("public status returns the same object without defaults", () => {
+    const value = { protocol: "d2b-stream", version: "0.1", state: "idle", uptime_us: 0 };
+    if (validatePublicStatus(value) !== value || Object.keys(value).length !== 4) throw new Error("public status was copied or defaulted");
+  }));
+
+  results.push(runTest("public status errors do not echo private values", () => {
+    try {
+      validatePublicStatus({ protocol: "d2b-stream", version: "0.1", state: "idle", uptime_us: 0, token: "secret-value" });
+    } catch (error) {
+      if (error instanceof ProtocolError && error.code === "invalid_public_status" && !String(error.message).includes("secret-value")) return;
+      throw error;
+    }
+    throw new Error("private public-status field was accepted");
+  }));
 
   results.push(runTest("fresh PCM state has anchor=null", () => {
     const state = createDecoderState(pcmContext);
