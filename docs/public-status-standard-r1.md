@@ -53,9 +53,10 @@ after saturation cannot be recovered exactly from this field.
 `producer_drop_count` and `output_queue_drop_count`, when present, are
 cumulative counts of logical sample frames lost during the current boot or
 reset epoch. They do not report TCP packet loss. `producer_drop_count` covers
-loss at the bounded acquisition producer queue. `output_queue_drop_count`
-covers loss after acquisition and encoding but before the WebSocket transport
-adapter accepts the data.
+logical sample frames lost because acquisition or its immediate bounded
+producer queue could not retain them. `output_queue_drop_count` covers logical
+sample frames discarded after acquisition and before transport-adapter
+acceptance.
 
 If one queued item contains multiple logical sample frames, a drop counter MUST
 increase by the number of logical sample frames lost, not merely by one queue
