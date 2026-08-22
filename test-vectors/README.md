@@ -12,6 +12,9 @@ protocol version 0.1. They are not captured measurement or audio recordings.
   boundaries, duplicate-set rejection, standard/private presence semantics, and
   positive/negative endpoint documents validated against
   `schemas/capabilities.schema.json`;
+- `public-status.json`: Public Status Standard R1 required/optional fields,
+  safe integer boundaries, closed-field behavior, and privacy-invalid endpoint
+  documents validated against `schemas/public-status.schema.json`;
 - `vi-frames.json`: 32-byte envelopes, timestamped records, validity,
   sequence/timestamp overflow, payload equations, gaps, and stream end;
 - `pcm-audio-frames.json`: mono PCM16 at 16000 Hz and 256 samples per frame,

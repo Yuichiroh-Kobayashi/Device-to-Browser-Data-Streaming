@@ -39,6 +39,11 @@ Webブラウザへ継続的に送信するための、ベンダー非依存ア�
 * [conformance matrix](docs/conformance-matrix.md)
 * 各profile仕様書
 
+[Public Status Standard R1](docs/public-status-standard-r1.md)は、既存の
+`/d2b/v0/status` responseを、closedかつbrowser-safeなversion 0.1の
+redacted representationとして正規化します。R1はconformance material上の
+名称であり、response bodyには追加されません。
+
 [先行事例およびプロトコル選定レポート](docs/prior-art-and-protocol-selection.md)では、
 serial通信、Bluetooth Low Energy、broker型通信、実験室向けstreaming stackを
 そのまま採用するのではなく、既存のWeb標準を組み合わせた理由を説明しています。
@@ -63,13 +68,14 @@ compactなlive binary profileを置き換えるものではなく、exportおよ
 
   * 自己完結したJSON Schema Draft 2020-12形式のcontrol message schema
   * capabilities schema
+  * public-status schema
 * `test-vectors/`
 
-  * JSON形式のcontrol、capabilities、binary frame golden vectors
+  * JSON形式のcontrol、capabilities、public-status、binary frame golden vectors
 * `tools/validate_test_vectors.py`
 
-  * schema構造、strict control fixture、binary frame、continuity、
-    mutation testを検証するPython標準ライブラリのみのvalidator
+  * schema構造、strict control/public-status fixture、binary frame、
+    continuity、mutation testを検証するPython標準ライブラリのみのvalidator
 * `tools/generate_test_vectors.py`
 
   * JSON形式のgolden vectorsを決定的に生成するPython標準ライブラリのみのgenerator

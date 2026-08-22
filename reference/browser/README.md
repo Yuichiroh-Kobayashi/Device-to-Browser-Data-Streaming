@@ -4,9 +4,10 @@ This directory is a product-neutral, dependency-free browser reference for the
 `d2b-stream/0.1` common parser. It is not a WebSocket server, product UI,
 graphing tool, recorder, exporter, PWA, or firmware implementation.
 
-It implements strict control parsing, capabilities validation, the 32-byte
-binary envelope, V/I and PCM profile decoding, continuity/gap metadata, and a
-static browser page that runs the four tracked synthetic vector documents.
+It implements strict control parsing, capabilities and public-status
+validation, the 32-byte binary envelope, V/I and PCM profile decoding,
+continuity/gap metadata, and a static browser page that runs the five tracked
+synthetic vector documents.
 
 ## Run locally
 

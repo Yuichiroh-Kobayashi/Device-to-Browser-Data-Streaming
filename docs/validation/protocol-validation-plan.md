@@ -17,8 +17,8 @@ contain an even number of hexadecimal digits, and decode to the stated frame.
 `tools/validate_test_vectors.py` MUST use only the Python standard library. It
 MUST check schema JSON syntax, the Draft 2020-12 declaration, local-only `$ref`
 values, and existence of every referenced local JSON Pointer. It performs
-Schema-equivalent manual validation for the control fixtures, not full JSON
-Schema meta-schema validation.
+Schema-equivalent manual validation for the control and public-status fixtures,
+not full JSON Schema meta-schema validation.
 
 The utility MUST also validate vector structure and unique names, capabilities,
 raw UTF-8
@@ -46,6 +46,10 @@ short/long/partial payloads, sequence/timestamp overflow, stream mismatch,
 regression and unexplained gaps, validity/delta failures, anchor timing,
 output-queue/producer/pause causes with and without gaps, binary before
 `stream_started`, maximum-size rejection, profile mismatch, and stream end.
+Public-status coverage includes the four required fields, every optional metric,
+all optional metrics omitted, both states, browser-safe integer boundaries,
+closed-field rejection, and explicit privacy-invalid injections. The Python and
+browser reference validators MUST run the same public-status vector corpus.
 
 ## 4. Independent implementation tests
 
@@ -88,8 +92,10 @@ git diff --check
 python3 -m json.tool schemas/client-message.schema.json >/dev/null
 python3 -m json.tool schemas/server-message.schema.json >/dev/null
 python3 -m json.tool schemas/capabilities.schema.json >/dev/null
+python3 -m json.tool schemas/public-status.schema.json >/dev/null
 python3 -m json.tool test-vectors/control-messages.json >/dev/null
 python3 -m json.tool test-vectors/capabilities.json >/dev/null
+python3 -m json.tool test-vectors/public-status.json >/dev/null
 python3 -m json.tool test-vectors/vi-frames.json >/dev/null
 python3 -m json.tool test-vectors/pcm-audio-frames.json >/dev/null
 PYTHONPYCACHEPREFIX=/tmp/d2b-stream-pycache python3 -m py_compile \

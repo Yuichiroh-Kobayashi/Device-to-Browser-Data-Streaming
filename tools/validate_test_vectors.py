@@ -26,15 +26,19 @@ SCHEMA_FILES = (
     ROOT / "schemas/client-message.schema.json",
     ROOT / "schemas/server-message.schema.json",
     ROOT / "schemas/capabilities.schema.json",
+    ROOT / "schemas/public-status.schema.json",
 )
 VECTOR_FILES = (
     ROOT / "test-vectors/control-messages.json",
     ROOT / "test-vectors/capabilities.json",
+    ROOT / "test-vectors/public-status.json",
     ROOT / "test-vectors/vi-frames.json",
     ROOT / "test-vectors/pcm-audio-frames.json",
 )
 
 FORMAT_ID = "d2b-stream-test-vectors/0.1"
+PUBLIC_STATUS_SCHEMA_ID = "urn:d2b-stream:0.1:public-status:r1"
+SAFE_UINT_MAX = 9007199254740991
 CONTROL_LIMIT = 2048
 ENVELOPE_SIZE = 32
 ENVELOPE = struct.Struct("<4sBBBBIIQQ")
@@ -150,12 +154,38 @@ def validate_schema_files() -> None:
     for path in SCHEMA_FILES:
         schema = require_object(load_json(path), str(path))
         require_keys(schema, {"$schema", "$id", "$defs"}, str(path))
-        if path.name == "capabilities.schema.json":
+        if path.name in {"capabilities.schema.json", "public-status.schema.json"}:
             require_keys(schema, {"type", "properties"}, str(path))
         else:
             require_keys(schema, {"oneOf"}, str(path))
         if schema["$schema"] != "https://json-schema.org/draft/2020-12/schema":
             raise FixtureError(f"{path}: schema draft is not 2020-12")
+        if path.name == "public-status.schema.json":
+            expected_properties = {
+                "protocol",
+                "version",
+                "state",
+                "uptime_us",
+                "producer_drop_count",
+                "output_queue_drop_count",
+                "queued_sample_count",
+                "connected_client_count",
+            }
+            if (
+                schema["$id"] != PUBLIC_STATUS_SCHEMA_ID
+                or schema.get("type") != "object"
+                or schema.get("additionalProperties") is not False
+                or schema.get("required")
+                != ["protocol", "version", "state", "uptime_us"]
+                or set(schema.get("properties", {})) != expected_properties
+                or schema.get("$defs", {}).get("safeUnsignedInteger")
+                != {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": SAFE_UINT_MAX,
+                }
+            ):
+                raise FixtureError(f"{path}: invalid Public Status Standard R1 boundary")
 
         def visit(value: Any) -> None:
             if isinstance(value, dict):
@@ -171,6 +201,64 @@ def validate_schema_files() -> None:
                     visit(child)
 
         visit(schema)
+
+
+def validate_schema_instance(
+    schema: dict[str, Any], instance: Any, path: Path
+) -> Any:
+    """Validate the Draft 2020-12 subset used by public status."""
+
+    def is_mathematical_integer(value: Any) -> bool:
+        return (
+            isinstance(value, int)
+            and not isinstance(value, bool)
+            or isinstance(value, float)
+            and math.isfinite(value)
+            and value.is_integer()
+        )
+
+    def visit(node: Any, value: Any, context: str) -> None:
+        if not isinstance(node, dict):
+            raise FixtureError(f"{path}: {context}: schema node is not an object")
+        if "$ref" in node:
+            ref = node["$ref"]
+            if not isinstance(ref, str):
+                raise FixtureError(f"{path}: {context}: non-string $ref")
+            visit(resolve_local_ref(schema, ref, path), value, context)
+        expected_type = node.get("type")
+        if expected_type == "object" and not isinstance(value, dict):
+            raise ValidationError("invalid_public_status", "expected object")
+        if expected_type == "integer" and not is_mathematical_integer(value):
+            raise ValidationError("invalid_public_status", "expected integer")
+        if "const" in node and value != node["const"]:
+            raise ValidationError("invalid_public_status", "constant mismatch")
+        if "enum" in node and value not in node["enum"]:
+            raise ValidationError("invalid_public_status", "enum mismatch")
+        if "minimum" in node and value < node["minimum"]:
+            raise ValidationError("invalid_public_status", "below minimum")
+        if "maximum" in node and value > node["maximum"]:
+            raise ValidationError("invalid_public_status", "above maximum")
+        if isinstance(value, dict):
+            required = node.get("required", [])
+            if not isinstance(required, list) or not all(
+                isinstance(key, str) for key in required
+            ):
+                raise FixtureError(f"{path}: {context}: invalid required keyword")
+            if any(key not in value for key in required):
+                raise ValidationError("invalid_public_status", "missing required field")
+            properties = node.get("properties", {})
+            if not isinstance(properties, dict):
+                raise FixtureError(f"{path}: {context}: invalid properties keyword")
+            if node.get("additionalProperties") is False and any(
+                key not in properties for key in value
+            ):
+                raise ValidationError("invalid_public_status", "unknown field")
+            for key, child in properties.items():
+                if key in value:
+                    visit(child, value[key], f"{context}.{key}")
+
+    visit(schema, instance, "$")
+    return instance
 
 
 def validate_capabilities(value: Any) -> dict[str, Any]:
@@ -1035,6 +1123,17 @@ CAPABILITIES_VECTOR_ALLOWED = CAPABILITIES_VECTOR_REQUIRED | {
     "expected_decoded",
     "expected_error",
 }
+PUBLIC_STATUS_VECTOR_REQUIRED = {
+    "name",
+    "purpose",
+    "category",
+    "document",
+    "expected_valid",
+}
+PUBLIC_STATUS_VECTOR_ALLOWED = PUBLIC_STATUS_VECTOR_REQUIRED | {
+    "expected_decoded",
+    "expected_error",
+}
 
 
 def validate_fixture_fields(
@@ -1148,10 +1247,47 @@ def validate_capabilities_vectors(document: dict[str, Any], names: set[str]) -> 
     return count
 
 
+def validate_public_status_vectors(
+    document: dict[str, Any], names: set[str]
+) -> int:
+    schema_path = ROOT / "schemas/public-status.schema.json"
+    schema = require_object(load_json(schema_path), str(schema_path))
+    categories = {"positive": 0, "structural": 0, "numeric": 0, "privacy": 0}
+    count = 0
+    for raw_vector in document["vectors"]:
+        vector = require_object(raw_vector, "public-status vector")
+        validate_fixture_fields(
+            vector,
+            PUBLIC_STATUS_VECTOR_REQUIRED,
+            PUBLIC_STATUS_VECTOR_ALLOWED,
+            "public-status vector",
+        )
+        register_vector_name(vector, names)
+        category = vector["category"]
+        if category not in categories:
+            raise FixtureError(f"{vector['name']}: invalid public-status category")
+        categories[category] += 1
+        result = None
+        error = None
+        try:
+            result = validate_schema_instance(schema, vector["document"], schema_path)
+        except ValidationError as exc:
+            error = exc
+        validate_vector_result(vector, result, error)
+        count += 1
+    if count < 31 or categories["positive"] < 7 or categories["privacy"] < 7:
+        raise FixtureError(
+            "public-status vectors require at least 31 total, 7 positive, and 7 privacy cases"
+        )
+    return count
+
+
 def validate_vector_document(path: Path, names: set[str]) -> int:
     document = require_object(load_json(path), str(path))
     common_fields = {"format", "protocol", "version", "vectors"}
-    if path.name in {"control-messages.json", "capabilities.json"}:
+    if path.name == "public-status.json":
+        expected_fields = common_fields | {"schema_draft", "schema_id"}
+    elif path.name in {"control-messages.json", "capabilities.json"}:
         expected_fields = common_fields | {"schema_draft"}
     else:
         expected_fields = common_fields | {"profile"}
@@ -1166,9 +1302,17 @@ def validate_vector_document(path: Path, names: set[str]) -> int:
         or not document["vectors"]
     ):
         raise FixtureError(f"{path}: invalid top-level metadata")
-    if path.name in {"control-messages.json", "capabilities.json"}:
+    if path.name in {
+        "control-messages.json",
+        "capabilities.json",
+        "public-status.json",
+    }:
         if document.get("schema_draft") != "2020-12":
             raise FixtureError(f"{path}: invalid schema_draft")
+    if path.name == "public-status.json":
+        if document.get("schema_id") != PUBLIC_STATUS_SCHEMA_ID:
+            raise FixtureError(f"{path}: invalid public-status schema_id")
+        return validate_public_status_vectors(document, names)
     if path.name == "control-messages.json":
         return validate_control_vectors(document, names)
     if path.name == "capabilities.json":

@@ -33,9 +33,12 @@ data and exports MUST preserve the gap and MUST distinguish synthetic values.
 
 ## 3. Producer overflow
 
-Acquisition MUST feed a bounded queue or ring buffer. When full, the producer
-MUST discard the oldest queued sample frame, increment `producer_drop_count` by
-the number of discarded sample frames, and continue without blocking. The next
+`PRODUCER_OVERFLOW` and `producer_drop_count` cover logical sample frames lost
+because acquisition or its immediate bounded producer queue could not retain
+them. Acquisition MUST feed a bounded queue or ring buffer. When full, the
+producer MUST discard the oldest queued sample frame and continue without
+blocking. For either acquisition-side cause, the server MUST increment
+`producer_drop_count` by the number of lost logical sample frames. The next
 successfully sent sample frame MUST preserve its original sequence and timestamp
 and MUST set `DISCONTINUITY | PRODUCER_OVERFLOW`.
 

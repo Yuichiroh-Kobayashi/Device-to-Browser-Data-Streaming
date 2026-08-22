@@ -11,6 +11,7 @@ future feature into Core.
 | Binary | exact 32-byte envelope; little-endian; payload equation | — | other versioned envelopes |
 | Session | one active owner; new stream ID on reconnect | — | multiple active owners |
 | Continuity | uint64 sequence/timestamp; flags; gaps preserved | redacted status counters | concealment algorithms |
+| Public status | public, read-only, redacted `/d2b/v0/status` | closed Public Status Standard R1 schema, vectors, and reference validator | a new coordinated named public-status revision |
 | Profiles | implement and advertise at least one of `vi-measurement` or `pcm-audio`; reject unimplemented/unknown profiles | implementing both standard profiles | generic scalar and private-profile implementations |
 | V/I export | binary live profile and normative SenML mapping | CSV and SenML JSON files | SenSML live and SenML CBOR |
 | PCM browser | waveform data model and segment behavior | five-second capture and WAV export | realtime playback, AudioWorklet, spectrogram |

@@ -3,6 +3,7 @@
 import { ProtocolError } from "../src/errors.js";
 import { parseControlMessageBytes, parseControlMessageText } from "../src/control-parser.js";
 import { validateCapabilities } from "../src/capabilities-validator.js";
+import { validatePublicStatus } from "../src/public-status-validator.js";
 import { createDecoderState } from "../src/decoder-state.js";
 import { decodeBinaryFrame, decodeBinaryFrameStructural } from "../src/decoder.js";
 
@@ -112,6 +113,16 @@ function runCapabilities(vector) {
   }
 }
 
+function runPublicStatus(vector) {
+  const value = cloneJson(vector.document);
+  const before = snapshot(value);
+  try {
+    return { actual: validatePublicStatus(value), stateUnchanged: before === snapshot(value) };
+  } catch (error) {
+    return { error, stateUnchanged: before === snapshot(value) };
+  }
+}
+
 export function runBinaryVector(vector, profile) {
   let state = null;
   let before = "";
@@ -133,6 +144,7 @@ export function runBinaryVector(vector, profile) {
 function categoryRunner(category, vector, profile) {
   if (category === "control") return runControl(vector);
   if (category === "capabilities") return runCapabilities(vector);
+  if (category === "public-status") return runPublicStatus(vector);
   return runBinaryVector(vector, profile);
 }
 
@@ -160,7 +172,7 @@ export function runVectorDocuments(entries) {
       }));
     }
   }
-  const categories = ["control", "capabilities", "V/I", "PCM"];
+  const categories = ["control", "capabilities", "public-status", "V/I", "PCM"];
   const summaries = Object.fromEntries(categories.map((category) => {
     const categoryResults = results.filter((result) => result.category === category);
     return [category, Object.freeze({ total: categoryResults.length, pass: categoryResults.filter((result) => result.pass).length, fail: categoryResults.filter((result) => !result.pass).length })];
