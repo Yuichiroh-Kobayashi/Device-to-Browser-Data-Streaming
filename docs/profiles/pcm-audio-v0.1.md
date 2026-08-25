@@ -60,13 +60,17 @@ earliest producer-visible event at which that first converted sample becomes
 available to the bounded acquisition pipeline.
 
 A sender MUST NOT assign the current device-monotonic time to a PCM buffer whose
-first sample had already become producer-visible before that reading. It also
-MUST NOT infer or backdate the anchor by subtracting a nominal frame duration
-from a completion time. A record/start request time, a later completion, poll,
-or consumer observation after an earlier producer-visible materialization
-event, transport enqueue time, WebSocket send time, browser arrival time, and
-wall-clock or SNTP time MUST NOT substitute for the required anchor source
-event.
+first sample had already become producer-visible before that reading. If no
+source acquisition timestamp is available for samples that were already
+materialized before the fallback event can be observed, those samples MUST NOT
+be selected as the first logical PCM sample position of the new stream. The
+sender MUST instead select a later sample position whose materialization event
+can be observed prospectively. It also MUST NOT infer or backdate the anchor by
+subtracting a nominal frame duration from a completion time. A record/start
+request time, a later completion, poll, or consumer observation after an earlier
+producer-visible materialization event, transport enqueue time, WebSocket send
+time, browser arrival time, and wall-clock or SNTP time MUST NOT substitute for
+the required anchor source event.
 
 The fallback timestamp is not an acoustic wavefront timestamp and does not
 guarantee a hardware or DMA acquisition edge. Version 0.1 does not represent
