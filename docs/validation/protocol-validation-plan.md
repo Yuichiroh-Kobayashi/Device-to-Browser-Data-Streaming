@@ -69,10 +69,14 @@ each new stream anchor. If the source exposes the first-sample acquisition
 timestamp in the same device-monotonic domain, the sender MUST use it.
 Otherwise, instrumentation MUST show exactly one fallback clock read at the
 earliest producer-visible materialization event. A completed-block-ready event
-is acceptable when it is the earliest such event. Tests MUST identify and
-reject retroactive clock assignment after earlier materialization, request-time
-substitution, completion-minus-duration inference, transport or browser-time
-substitution, and independent timer reads for later frames.
+is acceptable when it is the earliest such event. If samples were already
+materialized before the fallback event could be observed and no source
+acquisition timestamp is available for them, tests MUST verify that those
+samples are not selected as the new stream's first logical sample and that a
+later prospectively observable sample or block is selected instead. Tests MUST
+identify and reject retroactive clock assignment after earlier materialization,
+request-time substitution, completion-minus-duration inference, transport or
+browser-time substitution, and independent timer reads for later frames.
 
 A `vi-measurement` sender test MUST demonstrate that each record timestamp is
 the measurement/acquisition event in the device-local monotonic domain. The PCM
