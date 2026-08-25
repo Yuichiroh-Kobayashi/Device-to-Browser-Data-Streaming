@@ -136,7 +136,7 @@ For USB serial bring-up, debugging, simple classroom plotting, or diagnosis of
 a failed WebSocket path, an implementation may emit a separate text adapter:
 
 ```text
-voltage:3.214\tcurrent:0.152
+voltage:3.214	current:0.152
 ```
 
 This follows the Arduino Serial Plotter label/value and tab-separated form. It
