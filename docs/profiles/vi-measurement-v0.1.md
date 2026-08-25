@@ -58,6 +58,15 @@ nondecreasing; equal timestamps are allowed for sources whose clock resolution
 is coarser than acquisition. Every timestamp addition MUST be checked as uint64,
 and overflow is invalid.
 
+For `vi-measurement`, each reconstructed record timestamp denotes the
+measurement/acquisition time of the V/I sample frame represented by that record
+in the device-local monotonic clock domain. A sender MUST assign or preserve
+that measurement/acquisition timestamp at the measurement source/acquisition
+boundary. It MUST NOT replace that timestamp with later producer
+materialization, queue publication, transport enqueue, WebSocket send, or
+browser arrival time. The `pcm-audio` producer-visible materialization fallback
+does not apply to `vi-measurement`; record timestamps remain authoritative.
+
 ## 4. Validity
 
 `valid_mask` has these assignments:

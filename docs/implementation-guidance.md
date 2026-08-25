@@ -6,9 +6,13 @@ core protocol or profiles.
 ## 1. Device pipeline
 
 Use a high-priority acquisition producer and a lower-priority network consumer
-joined by a fixed-capacity queue or ring buffer. Assign sequence and monotonic
-timestamp at acquisition, before queueing. Keeping those values attached to the
-sample makes loss visible even if queue or network delays vary.
+joined by a fixed-capacity queue or ring buffer. Assign sequence at the
+acquisition/producer boundary. Assign or preserve timestamp metadata according
+to the selected profile's normative timestamp event before publishing into the
+bounded producer-consumer queue. Keeping those values attached to the sample
+makes loss visible even if queue or network delays vary. V/I
+measurement/acquisition timestamps remain authoritative; the PCM
+materialization fallback does not apply to them.
 
 When the acquisition queue is full, remove the oldest sample frame, saturating-
 increment the producer drop count, and enqueue the new sample. Let the consumer
@@ -38,12 +42,20 @@ Update continuity state only after the complete frame has passed validation.
 
 Keep per-stream state containing negotiated version, stream ID, profile,
 selected format/layout/rate, next sequence, and the session timestamp anchor.
-For PCM, read the device monotonic clock once for the first-sample anchor, then
-generate every later transport-frame timestamp from that anchor and logical
-sequence with rational or checked integer arithmetic. Do not independently read
-a timer for each frame or add rounded frame durations repeatedly. A receiver
-can apply a fixed ±1 microsecond tolerance. Never reinterpret an invalid
-channel's float field as real data.
+For PCM, establish exactly one first-sample anchor. Use a source-provided
+first-sample acquisition timestamp when it is in the same device-monotonic
+domain. Otherwise read that clock exactly once at the earliest producer-visible
+first-sample materialization event. A first completed-block-ready event is
+permitted when it is that earliest event. If earlier samples are already
+materialized without a source acquisition timestamp, do not select them as the
+new stream's first logical sample; instead select a later sample or block whose
+materialization event can be observed prospectively. Do not anchor an already
+materialized buffer with a later clock reading, infer an anchor by subtracting
+nominal frame duration from completion, independently read a timer for later
+frames, or add rounded frame durations repeatedly. Generate every later
+transport-frame timestamp from the anchor and logical sequence with rational or
+checked integer arithmetic. A receiver can apply a fixed ±1 microsecond
+tolerance. Never reinterpret an invalid channel's float field as real data.
 
 ## 4. Concurrency and lifecycle
 

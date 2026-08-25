@@ -41,10 +41,47 @@ partial channel frames, and non-reference sample counts are invalid.
 
 ## 3. Timing
 
-The sender MUST read the device monotonic clock for the first PCM sample frame
-and use that timestamp and sequence as the session anchor. For every later
-transport frame at sequence `s`, the sender MUST generate the nominal media
-timestamp from that anchor and the negotiated rational rate:
+For each new stream, the sender MUST establish exactly one PCM media-timeline
+anchor for the first logical PCM sample position of that stream. The anchor is
+the pair `anchor_sequence` and `anchor_timestamp_us`.
+
+If the source exposes a valid acquisition timestamp for that first logical PCM
+sample position in the device-local monotonic clock domain, the sender MUST use
+that timestamp as `anchor_timestamp_us`. This path does not require a fallback
+device-clock reading; the sender performs zero such fallback readings.
+
+Otherwise, the sender MUST take exactly one device-monotonic clock reading at
+the earliest producer-visible event at which the first converted PCM sample of
+the new stream becomes available to the application's bounded acquisition
+pipeline. This is the *producer-visible PCM materialization event*. If an
+acquisition API exposes completed blocks rather than sample-by-sample events,
+the first block-ready event MAY be this fallback event if and only if it is the
+earliest producer-visible event at which that first converted sample becomes
+available to the bounded acquisition pipeline.
+
+A sender MUST NOT assign the current device-monotonic time to a PCM buffer whose
+first sample had already become producer-visible before that reading. If no
+source acquisition timestamp is available for samples that were already
+materialized before the fallback event can be observed, those samples MUST NOT
+be selected as the first logical PCM sample position of the new stream. The
+sender MUST instead select a later sample position whose materialization event
+can be observed prospectively. It also MUST NOT infer or backdate the anchor by
+subtracting a nominal frame duration from a completion time. A record/start
+request time, a later completion, poll, or consumer observation after an earlier
+producer-visible materialization event, transport enqueue time, WebSocket send
+time, browser arrival time, and wall-clock or SNTP time MUST NOT substitute for
+the required anchor source event.
+
+The fallback timestamp is not an acoustic wavefront timestamp and does not
+guarantee a hardware or DMA acquisition edge. Version 0.1 does not represent
+acquisition-to-materialization latency on the wire. Receivers continue to
+interpret `first_sample_timestamp_us` as the stream's device-monotonic PCM
+media-timeline anchor for the first logical sample position; they cannot
+distinguish the acquisition and fallback paths from the wire and MUST NOT infer
+acoustic or DMA latency from that field.
+
+For every later transport frame at sequence `s`, the sender MUST generate the
+nominal media timestamp from the single anchor and the negotiated rational rate:
 
 ```text
 anchor_timestamp_us
