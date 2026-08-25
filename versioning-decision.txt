@@ -1,0 +1,24 @@
+classification:
+wire-compatible normative semantic clarification
+
+protocol version:
+0.1 unchanged
+
+reason:
+The change does not alter the receiver-visible meaning, encoding, units,
+validation, or arithmetic of first_sample_timestamp_us. It clarifies an
+underspecified sender-side choice of the source event used to establish the
+existing pcm-audio stream anchor.
+
+receiver behavior:
+unchanged
+
+schema/vector/parser:
+unchanged
+
+policy basis:
+docs/versioning-policy.md requires a new version for incompatible framing,
+semantics, or endpoint behavior and forbids changing an earlier negotiated
+version's field meanings. This clarification preserves the existing field
+meaning and receiver behavior and therefore leaves protocol version 0.1
+unchanged.
