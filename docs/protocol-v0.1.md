@@ -250,9 +250,11 @@ NOT coexist. Every cause flag MUST be accompanied by `DISCONTINUITY`.
 
 ## 9. Sequence, timestamp, and gap semantics
 
-Timestamps use a device-local monotonic microsecond clock. Browser arrival time
-MUST NOT be substituted for measurement time. For consecutive data frames the
-expected sequence is:
+Timestamps use a device-local monotonic microsecond clock. For data frames, the
+standard profile defines the source event represented by the timestamp.
+Browser arrival time, WebSocket send time, transport enqueue time, or wall
+clock time MUST NOT substitute for that profile-defined source event. For
+consecutive data frames the expected sequence is:
 
 ```text
 previous_first_sample_sequence + previous_sample_count

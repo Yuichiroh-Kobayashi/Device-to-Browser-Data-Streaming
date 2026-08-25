@@ -71,16 +71,20 @@ channel samples acquired at one logical time. A *transport frame* is one binary
 WebSocket message containing the 32-byte common envelope and a profile payload.
 
 Sequences count sample frames, not transport frames. Timestamps use a
-device-local monotonic clock in microseconds. Missing sample frames remain gaps
-in sequence and time; they MUST NOT be hidden by interpolation, zero fill,
-renumbering, or time-axis compression.
+device-local monotonic clock in microseconds, while each standard profile
+defines the source event represented by its data-frame timestamp. Missing
+sample frames remain gaps in sequence and time; they MUST NOT be hidden by
+interpolation, zero fill, renumbering, or time-axis compression.
 
-For fixed-rate PCM, the sender reads the device monotonic clock for the first
-sample-frame session anchor and derives later timestamps from that anchor,
-sequence, and negotiated rational rate. It does not independently read a timer
-for every transport frame. Receiver timing uses the same sequence/rate anchor,
-not WebSocket arrival time. Selected PCM format, layout, and rate remain fixed
-throughout the session.
+For V/I measurement, that event is the measurement/acquisition time. For
+fixed-rate PCM, it is a stream-local media anchor for the first logical sample:
+the source acquisition timestamp when exposed in the same device-monotonic
+domain, or otherwise the permitted earliest producer-visible materialization
+fallback. The sender derives later PCM timestamps from that anchor, sequence,
+and negotiated rational rate; it does not independently read a timer for every
+transport frame. Transport, WebSocket, and browser timing cannot substitute for
+either profile's source event. Selected PCM format, layout, and rate remain
+fixed throughout the session.
 
 ## 5. Resource ownership and backpressure
 
