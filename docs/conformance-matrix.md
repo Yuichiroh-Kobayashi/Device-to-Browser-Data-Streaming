@@ -23,3 +23,10 @@ device need implement only one. Capabilities MUST list only implemented
 profiles. Core receivers MUST reject unsupported profiles and parameter sets;
 they MUST not activate Future behavior through fallback. Optional exporters
 remain bound by Core gap and timestamp semantics.
+
+## Qualification boundary
+
+This matrix defines protocol-conformance scope. Passing it does not establish
+physical implementation qualification. See the
+[common physical qualification contract](qualification/README.md) for observer,
+evidence, session, lifecycle, preflight, and claim requirements.

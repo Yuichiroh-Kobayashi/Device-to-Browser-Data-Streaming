@@ -28,6 +28,12 @@ Start with the [protocol specification](docs/protocol-v0.1.md). The
 and profile documents provide the remaining details required for an independent
 implementation.
 
+The [common physical qualification contract](docs/qualification/README.md)
+defines how physical behavior is observed, preserved, and judged. Protocol
+conformance establishes the wire requirements implemented by a device or
+receiver; it does not by itself establish physical implementation
+qualification, and physical evidence does not redefine protocol semantics.
+
 [Public Status Standard R1](docs/public-status-standard-r1.md) formalizes the
 existing `/d2b/v0/status` response as a closed, browser-safe, redacted version
 0.1 representation. R1 is named in conformance material and is not added to the
@@ -43,6 +49,8 @@ and interoperability layer without replacing the compact live binary profile.
 
 - `docs/`: normative application-profile, profile, security, compatibility,
   prior-art, interoperability, and validation documents;
+- `docs/qualification/`: vendor-neutral physical qualification, observer,
+  evidence, lifecycle, and production execution-path requirements;
 - `schemas/`: self-contained JSON Schema Draft 2020-12 control-message,
   capabilities, and public-status schemas;
 - `test-vectors/`: JSON-encoded golden control, capabilities, public-status,
