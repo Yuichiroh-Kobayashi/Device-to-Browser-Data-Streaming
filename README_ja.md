@@ -37,7 +37,13 @@ Webブラウザへ継続的に送信するための、ベンダー非依存ア�
 * [実装ガイダンス](docs/implementation-guidance.md)
 * [deployment guide](docs/deployment-guide.md)
 * [conformance matrix](docs/conformance-matrix.md)
+* [共通physical qualification contract](docs/qualification/README.md)
 * 各profile仕様書
+
+Protocol conformanceはwire要件への適合範囲を示し、それだけではphysical
+implementation qualificationを成立させません。逆に、physical evidenceは
+protocol semanticsを再定義しません。Qualification contractの規範的な要件は
+英語文書を参照してください。
 
 [Public Status Standard R1](docs/public-status-standard-r1.md)は、既存の
 `/d2b/v0/status` responseを、closedかつbrowser-safeなversion 0.1の
@@ -64,6 +70,7 @@ compactなlive binary profileを置き換えるものではなく、exportおよ
   * 先行事例
   * 相互運用
   * validation関連文書
+  * `qualification/`のvendor-neutralなphysical qualification関連文書
 * `schemas/`
 
   * 自己完結したJSON Schema Draft 2020-12形式のcontrol message schema
