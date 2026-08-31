@@ -84,6 +84,10 @@ it.
 
 ## 7. Finalization order
 
+Evidence sealing MUST begin only after every declared qualification action and
+every cleanup or recovery action whose result belongs to the generation has
+completed.
+
 Finalization MUST use this ordering:
 
 1. stop all substantive writers;

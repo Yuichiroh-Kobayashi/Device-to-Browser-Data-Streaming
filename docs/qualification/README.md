@@ -13,7 +13,8 @@ This contract governs:
 - the host observer and its health authority;
 - evidence generations and their lifecycle;
 - physical session epochs;
-- WebSocket negative and lifecycle qualification; and
+- WebSocket negative and lifecycle qualification;
+- cross-service exclusion and handoff qualification; and
 - production execution-path preflight.
 
 It does not define or change:
@@ -21,7 +22,7 @@ It does not define or change:
 - wire, schema, or golden-vector semantics;
 - product-specific acceptance values;
 - product user interfaces or setup instructions;
-- product-specific topology or service-exclusion rules;
+- the product-specific choice of topology or exclusion/handoff policy;
 - a specific host runtime or API;
 - firmware or browser implementation behavior; or
 - protocol versioning, authentication, or close-code semantics.
@@ -31,6 +32,11 @@ remain the authority for wire behavior. This contract is normative only for
 qualification procedure, observer authority, evidence lifecycle, epoch
 declaration, lifecycle case classification, execution-path preflight, and claim
 boundaries.
+
+This contract defines how a declared cross-service exclusion or handoff policy
+is qualified. The product specification owns the directional choice to
+preserve, reject, terminate, or hand off a service, together with its stable
+states and recoverability requirements.
 
 ## 2. Authority hierarchy
 
@@ -93,6 +99,7 @@ declare:
 - setup-epoch permissions;
 - qualification-epoch prohibitions;
 - finalization requirements;
+- cleanup and rollback/recovery classification where applicable;
 - network-transition and offline-handoff requirements;
 - qualification stages;
 - the evidence-generation boundary for each stage;
@@ -100,6 +107,8 @@ declare:
 - handshake-negative cases;
 - accepted-session negative cases;
 - abrupt-lifecycle cases;
+- cross-service exclusion/handoff policy, directional transition semantics,
+  and recoverability requirements where applicable;
 - owner and session correlation identifiers;
 - the health evidence required for absence claims;
 - the public/private evidence boundary;
@@ -107,7 +116,8 @@ declare:
 - finalization order;
 - collision behavior;
 - retry policy;
-- timeout and deadline semantics;
+- purpose classification and expiration results for every timeout, deadline,
+  watchdog, and observation window;
 - success, failure, and hold markers;
 - the physical claim boundary; and
 - rollback or recovery boundaries where applicable.

@@ -64,6 +64,12 @@ from a mock.
 The preflight MUST demonstrate that a failure does not silently retry, overwrite
 an existing generation, delete partial evidence, or publish an invalid seal.
 
+Preflight MUST exercise applicable time-bound handling using the purpose
+classification in [Physical Session Epochs](physical-session-epochs.md#3-time-bound-classification).
+An observer-health watchdog or host-orchestration escape is not automatically a
+protocol or product timing requirement, and a logical-duration or exact-count
+criterion can remain authoritative independently of a wider wall-clock escape.
+
 ## 5. Cross-shell execution
 
 Shell expansion, quoting, path conversion, working directory, environment

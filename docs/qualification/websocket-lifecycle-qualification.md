@@ -26,16 +26,23 @@ Depending on existing protocol and product requirements, hard semantics can
 include:
 
 - no successful upgrade;
-- no owner acquisition;
-- no displacement of an existing owner;
+- no unintended ownership acquisition or displacement beyond the
+  product-declared exclusion or handoff policy;
 - no binary data on the rejected attempt; and
-- continued health of a protected active connection.
+- preservation of an active owner or service when the product specification
+  explicitly declares that owner or service protected from the competing
+  admission attempt.
 
 The product specification MUST identify which semantics are authoritative and
 how they are observed. Client-runtime terminal event ordering, local error text,
 and a transport close code are diagnostic-only unless the protocol or product
 specification explicitly makes them normative. Qualification MUST NOT invent a
 new close requirement to make a client harness deterministic.
+
+This policy flexibility MUST NOT weaken ordinary single-D2B-owner
+qualification. When the protocol or product contract protects the current D2B
+owner from a rejected second D2B owner attempt, that owner MUST remain unchanged
+and healthy as declared.
 
 ## 3. SESSION_CONTROL_NEGATIVE
 
@@ -100,7 +107,37 @@ PASS requires the declared evidence that no forbidden acquisition or
 displacement occurred and that the protected owner remained healthy when that
 health is part of the requirement.
 
-## 7. Correlation identifiers
+## 7. Cross-service exclusion and handoff qualification
+
+A product MAY declare D2B mutually exclusive with another long-lived service.
+The product specification MUST define the admission and transition policy in
+each direction, including the product-declared exclusion states, stable states,
+and recoverability requirements.
+
+The common contract does not require an already-active non-D2B service to
+remain active after a competing D2B admission attempt. A product specification
+MAY declare preservation of that service, its intentional stop or invalidation
+as part of a handoff, or another protocol-compatible transition. The common
+contract MUST NOT choose among those policies and MUST NOT require directional
+policies to be symmetric.
+
+For each declared exclusion or handoff transition, qualification MUST establish
+that:
+
+- conflicting ownership or reservations do not coexist;
+- a rejected or transitional admission does not acquire unintended ownership;
+- every declared stop, invalidation, handoff, or cleanup reaches its declared
+  completion;
+- no stale reservation, inhibition, or transition debt remains;
+- the exclusion state reaches the product-declared stable state; and
+- a later admission declared recoverable can demonstrably succeed.
+
+These invariants MUST be correlated across the competing admission, active or
+transitioning service, product-declared exclusion state, and observer health.
+They constrain state integrity and recoverability without requiring every
+rejected admission to be side-effect-free.
+
+## 8. Correlation identifiers
 
 The product specification MUST declare the stable identifiers available to
 correlate admission, owner, connection, session, stream, server generation,
@@ -112,7 +149,7 @@ This contract does not mandate one diagnostic schema or require every
 implementation to expose the same identifiers. The declared set MUST be
 sufficient to distinguish relevant old, rejected, active, and new lifecycles.
 
-## 8. Secret and log-leak boundary
+## 9. Secret and log-leak boundary
 
 When a negative case uses a credential, secret, or test canary, the product
 specification MUST declare where it may appear, the private evidence that can
@@ -125,7 +162,7 @@ scanned for the canary and other declared secrets before publication. A leak is
 an evidence/security failure under the product specification and MUST NOT be
 hidden by redaction after the generation is sealed.
 
-## 9. Related documents
+## 10. Related documents
 
 See the [common contract overview](README.md), [host observer contract](host-observer-contract.md),
 [physical session epochs](physical-session-epochs.md), and
