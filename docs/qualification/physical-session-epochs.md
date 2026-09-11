@@ -75,6 +75,13 @@ an inner human-wait timeout MUST NOT be described as unlimited waiting when an
 outer limit can still expire. The procedure MUST identify the remaining budget
 needed to start a case and the result when preparation exhausts that budget.
 
+These SETUP budget requirements apply prospectively to new sessions that
+explicitly adopt a document revision containing them, identified through the
+existing revision reference or exact commit. They do not reclassify past
+evidence generations, existing releases, or previously recorded qualification
+results. Adopting this qualification revision does not automatically change
+the D2B input identity used to generate a Viewer bundle.
+
 `SETUP_EPOCH` establishes the declared observation and execution environment.
 Only operations allowed by the product specification MAY occur. Examples of
 declarable setup operations include:

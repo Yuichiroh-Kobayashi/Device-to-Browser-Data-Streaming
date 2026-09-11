@@ -4,7 +4,7 @@
 
 初めて担当する人が、デバイスAPでの通信試験をローカル操作で開始・中止・保存するための入口。
 製品の操作と合格値は製品側の手順を使い、正式な適合確認では[共通契約](README.md)も満たす。
-この文書はwire、認証、合格値を変更しない。
+この実務手順はwire、認証、製品の合格値を変更しない。
 
 - [ ] 対象と使用するFirmware、許可された操作、停止条件を確認した。
 - [ ] 一つのシリアル観測器と新しい保存先を用意した。
@@ -23,6 +23,11 @@ virtual clockだけの試験では実時計・保存経路を確認したこと�
 開始／中止／保存command、各制限と満了時の結果をまとめる。
 必要なSHAは入力manifestで管理し、観測器同士や製品別helperへ重複して直書きしない。
 観測器は事実を記録し、validatorは製品の規則で判定する。
+
+試験計画には、採用するD2B qualification文書のrevisionをexact commit等で指定する。
+[SETUP前の予算宣言](physical-session-epochs.md#4-setup_epoch)は、この要件を含むrevisionを
+採用する以後の新規試験に適用する。過去の試験結果や既存releaseは遡及再判定しない。
+この文書revisionの採用だけで、Viewer生成に使うD2B入力identityを更新しない。
 
 開発確認では、最後の確認以降にflash・OTA・別imageへの変更をしていないという担当者の
 申告を、根拠の種類と確認時刻を添えて利用できる。これは未観測区間の無reset証明でも、
@@ -75,12 +80,29 @@ activeな原本を別processで追尾する代わりに、process情報、file�
 
 ## 終了と保存
 
-1. 新しい試験操作を止め、試験終了と理由を記録する。
-2. 宣言済みの後片付けを行い、観測器を停止して子processとwriterの終了を確認する。
-3. writer自身が書込みに使ったdescriptorでflushし、close・final summaryの成功を確認する。
-   保存失敗や強制終了があれば不完全な記録として保持する。
-4. 原本の相対path・byte数・SHA-256をinventoryへ保存し、checksum manifestを別途検証する。
-5. コピー先でも同じ項目を照合する。writer動作中のコピーを完成品と扱わない。
+[既存の保存契約](evidence-generation-and-durability.md#7-finalization-order)に従い、
+新規取得の停止、保持中の書込みhandleによるfinalization、processの終了確認を分ける。
+
+1. 新しい試験操作を止め、宣言した境界で判定対象区間の終了と理由を記録する。
+   正常停止やowner解放は宣言した期限・停止条件まで観測し、
+   観測器の早期停止で判定に必要な記録を切り落とさない。
+   同じ記録単位に含める、許可済みの後片付け・復元操作とその記録を完了する。
+2. 観測器へ正常停止を要求して新規取得を止め、宣言済みの範囲のbufferをdrainする。
+   強制終了を正常停止の代わりにしない。
+3. streaming writerが有効なwritable descriptor/handleを保持している間に、
+   対象hostで確認済みのflush/durability処理を行い、closeする。
+   終了済みprocessやclose済みhandleに新たなflushを要求しない。
+4. 子process・writerの終了とexit/finalization結果を確認し、最終result・observer summaryを確定する。
+   別writerがそれらを書く場合は、その保存・finalization・close・終了確認も完了する。
+   強制終了、flush失敗、summary欠落は不完全な記録として保持する。
+5. 対象ファイルが全て確定してからinventory、checksum manifest、独立照合、
+   必要な外側identityの記録、封印を順に行う。その後に実質的な証拠を書き足さない。
+   コピーする場合は、sourceの確定inventory/identityとコピー先の長さ・SHA-256を照合する。
+   不一致や途中コピーを完成品と扱わない。
+
+封印後にAP停止や端末設定の復元を行う設計では、その結果を封印対象外の別記録または
+新しい記録単位に保存すると事前に定める。同じ記録単位に結果を含める操作は手順1で完了する。
+既存helperが上記のどこを担うかは実行設定で対応付け、host API名だけで保存保証を認定しない。
 
 読取り専用化は誤編集を減らす措置であり、暗号学的に改ざん不能になったという意味ではない。
 認証値、個体識別情報、私的network名、個人path、学校情報を含む原本は公開文書へ貼らない。
