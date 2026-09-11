@@ -69,6 +69,12 @@ of any timeout, deadline, or watchdog MUST NOT silently trigger retry.
 
 ## 4. SETUP_EPOCH
 
+Before entry, the declared time-bound inventory MUST include outer capture
+duration and storage limits that continue during human preparation. Disabling
+an inner human-wait timeout MUST NOT be described as unlimited waiting when an
+outer limit can still expire. The procedure MUST identify the remaining budget
+needed to start a case and the result when preparation exhausts that budget.
+
 `SETUP_EPOCH` establishes the declared observation and execution environment.
 Only operations allowed by the product specification MAY occur. Examples of
 declarable setup operations include:
