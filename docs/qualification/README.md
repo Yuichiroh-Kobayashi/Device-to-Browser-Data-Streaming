@@ -1,5 +1,9 @@
 # Common Physical Qualification Contract
 
+Start with the Japanese [practical observation guide](practical-observation.md)
+for preparation, AP connection, local stop, clocks, and saving results.
+It is an operational entrypoint; the normative contract below remains applicable.
+
 ## 1. Purpose and scope
 
 This directory defines the vendor-neutral qualification contract for observing,
