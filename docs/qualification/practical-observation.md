@@ -52,7 +52,7 @@ Do not reuse a short machine-response deadline for human preparation time.
 For example, disabling a human-wait timeout does not create unlimited waiting when the total capture duration is 20 minutes: after 18 minutes of waiting to connect, only 2 minutes remain.
 A 5-minute test cannot be started, and if the 20-minute limit is reached while waiting, the attempt ends because the outer capture limit expired.
 Display or otherwise check remaining time and storage capacity before starting, and do not describe an operation as "unlimited" while finite outer limits still apply.
-Decide any extension or separate capture generation before the test begins, and preserve earlier results.
+Decide any extension or separate evidence generation before the test begins, and preserve earlier results.
 
 After switching to the device AP, continued cloud-AI availability is not a prerequisite for continuing the test.
 Proceed with the locally saved start command and use the prevalidated local abort command when needed.
