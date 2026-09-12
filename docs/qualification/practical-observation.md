@@ -1,110 +1,107 @@
-# 実機の接続・観測・保存の実務手順
+# Practical Guide for Physical Connection, Observation, and Evidence Saving
 
-## 目的
+## Purpose
 
-初めて担当する人が、デバイスAPでの通信試験をローカル操作で開始・中止・保存するための入口。
-製品の操作と合格値は製品側の手順を使い、正式な適合確認では[共通契約](README.md)も満たす。
-この実務手順はwire、認証、製品の合格値を変更しない。
+This guide is an operational entry point for someone running a device-AP communication test for the first time: preparing it locally, starting it, stopping it, and saving the resulting evidence.
+Use the product-specific procedure for product operations and acceptance criteria, and also satisfy the [common contract](README.md) for formal qualification.
+This practical guide does not change the wire protocol, authentication requirements, or product acceptance criteria.
 
-- [ ] 対象と使用するFirmware、許可された操作、停止条件を確認した。
-- [ ] 一つのシリアル観測器と新しい保存先を用意した。
-- [ ] 手順・runtime・開始／中止／保存のcommandを端末内へ保存した。
-- [ ] 人待ち、通信期限、総収録時間、容量上限を別々に確認した。
-- [ ] 観測開始・試験開始・試験終了を別々に記録できる。
+- [ ] Confirm the target, the Firmware in use, permitted operations, and stop conditions.
+- [ ] Prepare one serial observer and a fresh evidence destination.
+- [ ] Save the procedure, runtime, and start/abort/save commands locally before execution.
+- [ ] Check human-wait limits, communication deadlines, total capture duration, and storage capacity separately.
+- [ ] Ensure observation start, test start, and test end can be recorded separately.
 
-## 準備
+## Preparation
 
-実行OS、runtime、保存filesystem、子processの起動・終了方法を記録する。
-Windowsがportを所有する構成では、Windows-native runtimeとNTFS上の新規保存先を使う。
-ネットワーク切替前に、実際の保存・停止経路を実機接続なしの短い試験で確かめる。
-virtual clockだけの試験では実時計・保存経路を確認したことにならない。
+Record the execution OS, runtime, destination filesystem, and how child processes are started and terminated.
+When Windows owns the port, use a Windows-native runtime and a fresh destination on NTFS.
+Before switching networks, perform a short test without the physical device to verify the actual save and stop path.
+A test that uses only a virtual clock does not qualify the real clock or the actual save path.
 
-実行設定には対象endpoint、source/build識別情報、入力manifest、観測器、製品別validator、
-開始／中止／保存command、各制限と満了時の結果をまとめる。
-必要なSHAは入力manifestで管理し、観測器同士や製品別helperへ重複して直書きしない。
-観測器は事実を記録し、validatorは製品の規則で判定する。
+The execution configuration should collect the target endpoint, source/build identity, input manifest, observer, product-specific validator,
+start/abort/save commands, and each limit together with the result produced when that limit expires.
+Manage required SHA values in the input manifest; do not duplicate hard-coded values across observers or product-specific helpers.
+The observer records facts; the validator applies product-specific rules.
 
-試験計画には、採用するD2B qualification文書のrevisionをexact commit等で指定する。
-[SETUP前の予算宣言](physical-session-epochs.md#4-setup_epoch)は、この要件を含むrevisionを
-採用する以後の新規試験に適用する。過去の試験結果や既存releaseは遡及再判定しない。
-この文書revisionの採用だけで、Viewer生成に使うD2B入力identityを更新しない。
+The test plan must identify the adopted D2B qualification-document revision by exact commit or an equivalent revision reference.
+The [pre-SETUP budget declaration](physical-session-epochs.md#4-setup_epoch) applies to new qualification sessions that adopt a revision containing that requirement.
+Do not retroactively reclassify historical test results or existing releases.
+Adopting this document revision alone does not update the D2B input identity used to generate a Viewer bundle.
 
-開発確認では、最後の確認以降にflash・OTA・別imageへの変更をしていないという担当者の
-申告を、根拠の種類と確認時刻を添えて利用できる。これは未観測区間の無reset証明でも、
-binary readbackによる同一性確認でもない。正式な適合・release確認で要求される
-candidate同一性確認を、この申告だけで置き換えない。
+For development checks, an operator statement that no flash, OTA, or switch to another image occurred after the last verification may be used when accompanied by the type of supporting evidence and the verification time.
+That statement is neither proof that no reset occurred during an unobserved interval nor exact-binary verification by readback.
+Do not use that statement alone to replace candidate-identity verification required for formal qualification or release confirmation.
 
-## 操作
+## Operation
 
-| 順序 | 操作 | 確認結果 | 満たさない場合 |
+| Order | Operation | Expected observation | If not satisfied |
 | --- | --- | --- | --- |
-| 接続前 | 対象の安定した識別情報と現在のportを製品手順で対応付ける | 対象が一意 | 曖昧なら開始を保留 |
-| 観測開始 | 指定した一つの観測器でportを開く | process生存、port関連付け、期待するbyte進捗 | 二重monitor、再open、自動再接続を止めて状況を保存 |
-| 準備確認 | port-open時に観測したboot/resetを保存する | 試験開始前の状態が確定 | 未観測のreset有無を推定しない |
-| AP接続 | 製品手順でAP参加、IP取得を確認する | associationとIPを別々に記録 | 接続待ちとして扱い、通信試験を開始しない |
-| 試験開始 | 残りの収録時間と容量を確認し、開始を記録する | 製品試験に必要な余裕がある | 余裕不足を製品FAILにせず、その試行を中止・保存 |
-| 通信 | HTTP取得、WS接続、開始、データ、正常停止を順に試す | 各層の結果と時刻が残る | 宣言した停止条件に従い、後続は未実行と記録 |
+| Before connection | Correlate the target's stable identity with the current port using the product procedure | Target is unique | Hold before starting if ambiguous |
+| Start observation | Open the port with the single designated observer | Process is alive, port association is correct, and expected byte progress is observed | Stop duplicate monitors, reopen loops, or automatic reconnect; preserve the state |
+| Preparation check | Save any boot/reset observed when the port was opened | Pre-test state is established | Do not infer whether an unobserved reset occurred |
+| Join AP | Join the AP using the product procedure and confirm IP acquisition | Record association and IP separately | Treat as connection wait; do not start the communication test |
+| Start test | Check remaining capture time and storage capacity, then record test start | Enough budget remains for the product test | Abort and save the attempt as an environment/setup limitation, not a product FAIL |
+| Communication | Exercise HTTP fetch, WS connection, start, data, and normal stop in order | Result and timestamp remain for each layer | Follow the declared stop condition and record later steps as NOT RUN |
 
-port-open時のreset挙動は機種・driver・設定で異なる。準備中に起きたresetと試験中の
-resetを分け、観測されていない時間の連続稼働を断定しない。
-取得を期待しない静かな区間も事前に定義し、process生存だけで受信正常としない。
+Reset behavior when opening a port varies by device, driver, and configuration.
+Distinguish resets that occur during preparation from resets that occur during the test, and do not claim uninterrupted operation across unobserved intervals.
+Predeclare quiet periods in which no acquisition is expected; process liveness alone does not establish healthy reception.
 
-人待ちには、機械のHTTP/WS応答に使う短いdeadlineを流用しない。
-例えば人待ちtimeoutを無効にしても、収録全体が20分なら18分の接続待ち後には2分しか
-残らない。5分の試験は開始できず、待機中に20分へ到達すれば収録上限で中止となる。
-開始前に残時間・容量を表示または確認し、有限な外側の制限がある運用を「無期限」と呼ばない。
-必要な延長や別の収録単位は試験開始前に決め、過去の結果は保持する。
+Do not reuse a short machine-response deadline for human preparation time.
+For example, disabling a human-wait timeout does not create unlimited waiting when the total capture duration is 20 minutes: after 18 minutes of waiting to connect, only 2 minutes remain.
+A 5-minute test cannot be started, and if the 20-minute limit is reached while waiting, the attempt ends because the outer capture limit expired.
+Display or otherwise check remaining time and storage capacity before starting, and do not describe an operation as "unlimited" while finite outer limits still apply.
+Decide any extension or separate capture generation before the test begins, and preserve earlier results.
 
-AP切替後のクラウドAI応答は続行条件にしない。保存済みの開始commandで進め、異常時は
-事前確認したローカル中止commandを使う。停止・保存を保証しない強制終了は通常の中止に使わない。
-クラウド通信が復旧するまで判定や保存を待つ必要はない。
+After switching to the device AP, continued cloud-AI availability is not a prerequisite for continuing the test.
+Proceed with the locally saved start command and use the prevalidated local abort command when needed.
+Do not use forced termination as the normal abort path when it cannot guarantee orderly stop and saving.
+There is no need to wait for cloud connectivity to return before classifying or saving the local result.
 
-## 確認結果
+## Checking Results
 
-host UTCは人が記録を並べるための時計、host monotonicはhost内の経過時間、
-device uptimeはdevice内の経過時間である。UTCとuptimeの差が似ているだけで
-同一起動とは断定しない。観測したboot、接続境界、製品側の識別情報を併記する。
+Host UTC is a clock for ordering records across human review, host monotonic time measures elapsed time within the host, and device uptime measures elapsed time within the device.
+Similar UTC and uptime deltas do not prove that observations came from the same uninterrupted boot.
+Record observed boots, connection boundaries, and product-specific identity information together.
 
-観測器のprocess生存、byte進捗、decode進捗、port変化を別々に確認する。
-activeな原本を別processで追尾する代わりに、process情報、file長などのmetadata、
-観測器自身のcounterを使う。内容検索はwriter終了後に行う。
-健全に観測できた範囲だけを判定し、保存成功を製品合格としない。
+Check observer process liveness, byte progress, decode progress, and port changes separately.
+Instead of having another process tail the active authoritative file, use process information, metadata such as file length, and counters exposed by the observer itself.
+Search file contents only after the writer has finished.
+Classify only the interval that was observed healthily, and do not treat successful saving as product qualification success.
 
-## 失敗時の行動
+## Failure Handling
 
-観測器・保存・人待ちの制限、ネットワーク離脱、製品の応答違反を別項目で記録する。
-理由を判定できなければINCONCLUSIVE、開始条件が欠ければHOLD、開始しなかった項目はNOT RUN。
-製品FAILは宣言した要求を実際に試して満たさなかった場合に限る。
-応答送信の成功と相手の受信は別の観測であり、close codeやstation reasonだけで原因を断定しない。
-再試行が許可された場合も、新しい保存先に理由・変更条件・元の試行との関係を残す。
+Record observer failures, save failures, human-wait/resource limits, network departure, and product response violations as separate items.
+If the reason cannot be determined, classify the result as INCONCLUSIVE; if an entry condition is missing, use HOLD; if a step was never started, use NOT RUN.
+Use product FAIL only when a declared product requirement was actually exercised and not satisfied.
+Successful response transmission and peer receipt are distinct observations; do not infer root cause from a close code or station reason alone.
+When a retry is allowed, use a fresh destination and record the reason, changed conditions, and relationship to the earlier attempt.
 
-## 終了と保存
+## Finalization and Saving
 
-[既存の保存契約](evidence-generation-and-durability.md#7-finalization-order)に従い、
-新規取得の停止、保持中の書込みhandleによるfinalization、processの終了確認を分ける。
+Following the [existing evidence durability contract](evidence-generation-and-durability.md#7-finalization-order), keep these stages separate: stop new acquisition, finalize through the still-valid writable handle, and confirm process completion.
 
-1. 新しい試験操作を止め、宣言した境界で判定対象区間の終了と理由を記録する。
-   正常停止やowner解放は宣言した期限・停止条件まで観測し、
-   観測器の早期停止で判定に必要な記録を切り落とさない。
-   同じ記録単位に含める、許可済みの後片付け・復元操作とその記録を完了する。
-2. 観測器へ正常停止を要求して新規取得を止め、宣言済みの範囲のbufferをdrainする。
-   強制終了を正常停止の代わりにしない。
-3. streaming writerが有効なwritable descriptor/handleを保持している間に、
-   対象hostで確認済みのflush/durability処理を行い、closeする。
-   終了済みprocessやclose済みhandleに新たなflushを要求しない。
-4. 子process・writerの終了とexit/finalization結果を確認し、最終result・observer summaryを確定する。
-   別writerがそれらを書く場合は、その保存・finalization・close・終了確認も完了する。
-   強制終了、flush失敗、summary欠落は不完全な記録として保持する。
-5. 対象ファイルが全て確定してからinventory、checksum manifest、独立照合、
-   必要な外側identityの記録、封印を順に行う。その後に実質的な証拠を書き足さない。
-   コピーする場合は、sourceの確定inventory/identityとコピー先の長さ・SHA-256を照合する。
-   不一致や途中コピーを完成品と扱わない。
+1. Stop initiating new test actions, and record the end and reason for the claim-bearing interval at the declared boundary.
+   Observe normal stop and owner release through the declared deadlines and stop conditions; do not stop the observer early and cut off evidence needed for classification.
+   Complete any permitted cleanup or recovery action whose result belongs to the same evidence generation, together with the recording of that result.
+2. Request normal shutdown of the observer, stop new acquisition, and drain buffers within the predeclared scope.
+   Do not substitute forced termination for normal shutdown.
+3. While the streaming writer still holds the valid writable descriptor/handle, perform the flush/durability operation qualified for the target host, then close it.
+   Do not attempt a new flush through a process that has already exited or a handle that has already been closed.
+4. Confirm child-process and writer termination together with exit/finalization results, then finalize the result and observer summary.
+   If a separate writer produces those files, complete its save, finalization, close, and termination checks as well.
+   Preserve forced termination, flush failure, or a missing summary as incomplete evidence rather than repairing it in place.
+5. Only after all target files are final, generate the inventory and checksum manifest, perform independent verification, record any required outer identity, and seal the generation in that order.
+   Do not add substantive evidence after sealing.
+   If evidence is copied, compare the finalized source inventory/identity with destination lengths and SHA-256 values.
+   Do not treat a mismatch or partial copy as a completed identical copy.
 
-封印後にAP停止や端末設定の復元を行う設計では、その結果を封印対象外の別記録または
-新しい記録単位に保存すると事前に定める。同じ記録単位に結果を含める操作は手順1で完了する。
-既存helperが上記のどこを担うかは実行設定で対応付け、host API名だけで保存保証を認定しない。
+If the design performs AP shutdown or restoration of host/device settings after sealing, predeclare that the result will be stored in a separate record outside the sealed generation or in a new evidence generation.
+Any cleanup result that must belong to the same evidence generation must be completed in step 1 before finalization begins.
+Map existing helpers to the stages above in the execution configuration; naming a host API alone does not qualify durability guarantees.
 
-読取り専用化は誤編集を減らす措置であり、暗号学的に改ざん不能になったという意味ではない。
-認証値、個体識別情報、私的network名、個人path、学校情報を含む原本は公開文書へ貼らない。
-公開するのは必要な識別hash、短い結果表、未実施事項を確認した派生報告に限る。
-HOST確認・build確認・実機確認はそれぞれ独立して報告する。
+Making files read-only reduces accidental modification; it does not make evidence cryptographically immutable.
+Do not paste authoritative raw evidence containing authentication values, stable device identifiers, private network names, personal paths, or school information into public documentation.
+Publish only the necessary identifying hashes, compact result tables, and derived reports that state unperformed work explicitly.
+Report HOST checks, build checks, and physical checks independently.
